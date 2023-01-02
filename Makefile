@@ -1,6 +1,6 @@
 CONTAINER_ENGINE ?= podman
 
-CHECKUP_IMAGE_NAME := quay.io/kiagnose/kubevirt-rt-checkup
+CHECKUP_IMAGE_NAME ?= quay.io/kiagnose/kubevirt-rt-checkup
 CHECKUP_IMAGE_TAG ?= devel
 
 GO_IMAGE_NAME := docker.io/library/golang
@@ -26,3 +26,7 @@ unit-test:
 lint:
 	$(CONTAINER_ENGINE) run --rm -v $(PWD):$(PROJECT_WORKING_DIR):Z --workdir $(PROJECT_WORKING_DIR) $(LINTER_IMAGE_NAME):$(LINTER_IMAGE_TAG) golangci-lint run -v
 .PHONY: lint
+
+push: build
+	$(CONTAINER_ENGINE) push $(CHECKUP_IMAGE_NAME):$(CHECKUP_IMAGE_TAG)
+.PHONY: push
