@@ -1,0 +1,26 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      CONTAINER_ENGINE: podman
+      CHECKUP_IMAGE_TAG: ${{github.ref_name}}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Login to quay.io
+        run:
+          ${CONTAINER_ENGINE} login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
+      - name: Build and push image
+        run: make push
