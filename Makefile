@@ -11,6 +11,9 @@ LINTER_IMAGE_TAG := v1.50.1
 
 PROJECT_WORKING_DIR := /go/src/github.com/kiagnose/kubevirt-rt-checkup
 
+all: lint unit-test build
+.PHONY: all
+
 build:
 	$(CONTAINER_ENGINE) run --rm -v $(PWD):$(PROJECT_WORKING_DIR):Z --workdir $(PROJECT_WORKING_DIR) $(GO_IMAGE_NAME):$(GO_IMAGE_TAG) go build -v -o ./bin/kubevirt-rt-checkup ./cmd/
 	$(CONTAINER_ENGINE) build . -t $(CHECKUP_IMAGE_NAME):$(CHECKUP_IMAGE_TAG)
