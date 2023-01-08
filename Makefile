@@ -20,11 +20,11 @@ build:
 .PHONY: build
 
 unit-test:
-	$(CONTAINER_ENGINE) run --rm -v $(PWD):$(PROJECT_WORKING_DIR):Z --workdir $(PROJECT_WORKING_DIR) $(GO_IMAGE_NAME):$(GO_IMAGE_TAG) go test -v ./...
+	$(CONTAINER_ENGINE) run --rm -v $(PWD):$(PROJECT_WORKING_DIR):Z --workdir $(PROJECT_WORKING_DIR) $(GO_IMAGE_NAME):$(GO_IMAGE_TAG) go test -v ./cmd/... ./pkg/...
 .PHONY: unit-test
 
 lint:
-	$(CONTAINER_ENGINE) run --rm -v $(PWD):$(PROJECT_WORKING_DIR):Z --workdir $(PROJECT_WORKING_DIR) $(LINTER_IMAGE_NAME):$(LINTER_IMAGE_TAG) golangci-lint run -v
+	$(CONTAINER_ENGINE) run --rm -v $(PWD):$(PROJECT_WORKING_DIR):Z --workdir $(PROJECT_WORKING_DIR) $(LINTER_IMAGE_NAME):$(LINTER_IMAGE_TAG) golangci-lint run -v --timeout=3m ./cmd/... ./pkg/...
 .PHONY: lint
 
 push: build
