@@ -17,24 +17,24 @@
  *
  */
 
-package main
+package pkg
 
 import (
-	"log"
-	"os"
+	kconfig "github.com/kiagnose/kiagnose/kiagnose/config"
 
-	"github.com/kiagnose/kiagnose/kiagnose/environment"
-
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg"
+	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/client"
 )
 
-func main() {
-	log.Println("kubevirt-rt-checkup starting...")
-	rawEnv := environment.EnvToMap(os.Environ())
-
-	const errMessagePrefix = "kubevirt-rt-checkup failed"
-
-	if err := pkg.Run(rawEnv); err != nil {
-		log.Fatalf("%s: %v\n", errMessagePrefix, err)
+func Run(rawEnv map[string]string) error {
+	c, err := client.New()
+	if err != nil {
+		return err
 	}
+
+	_, err = kconfig.Read(c, rawEnv)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
