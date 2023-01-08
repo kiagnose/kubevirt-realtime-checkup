@@ -13,28 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Copyright 2023 Red Hat, Inc.
+ * Copyright 2022 Red Hat, Inc.
  *
  */
 
-package main
+package environment
 
 import (
-	"log"
 	"os"
-
-	"github.com/kiagnose/kiagnose/kiagnose/environment"
-
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg"
+	"strings"
 )
 
-func main() {
-	log.Println("kubevirt-rt-checkup starting...")
-	rawEnv := environment.EnvToMap(os.Environ())
+func EnvToMap(rawEnv []string) map[string]string {
+	const requiredElementsCount = 2
 
-	const errMessagePrefix = "kubevirt-rt-checkup failed"
+	env := map[string]string{}
 
-	if err := pkg.Run(rawEnv); err != nil {
-		log.Fatalf("%s: %v\n", errMessagePrefix, err)
+	for _, entry := range rawEnv {
+		splitKeyValue := strings.Split(entry, "=")
+		if len(splitKeyValue) != requiredElementsCount {
+			continue
+		}
+
+		env[splitKeyValue[0]] = splitKeyValue[1]
 	}
+
+	return env
+}
+
+func ReadNamespaceFile() (string, error) {
+	const namespaceFile = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+
+	ns, err := os.ReadFile(namespaceFile)
+	if err != nil {
+		return "", err
+	}
+
+	return string(ns), nil
 }

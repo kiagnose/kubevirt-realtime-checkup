@@ -3,6 +3,7 @@ module github.com/kiagnose/kubevirt-rt-checkup
 go 1.19
 
 require (
+	github.com/kiagnose/kiagnose v0.2.1-0.20221208132946-95d8c7995fab
 	k8s.io/client-go v12.0.0+incompatible
 	kubevirt.io/client-go v0.58.0
 )

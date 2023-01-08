@@ -13,28 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Copyright 2023 Red Hat, Inc.
+ * Copyright 2022 Red Hat, Inc.
  *
  */
 
-package main
+package configmap
 
 import (
-	"log"
-	"os"
+	"context"
 
-	"github.com/kiagnose/kiagnose/kiagnose/environment"
-
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
-func main() {
-	log.Println("kubevirt-rt-checkup starting...")
-	rawEnv := environment.EnvToMap(os.Environ())
+func Get(client kubernetes.Interface, namespace, name string) (*corev1.ConfigMap, error) {
+	return client.CoreV1().ConfigMaps(namespace).Get(context.Background(), name, metav1.GetOptions{})
+}
 
-	const errMessagePrefix = "kubevirt-rt-checkup failed"
-
-	if err := pkg.Run(rawEnv); err != nil {
-		log.Fatalf("%s: %v\n", errMessagePrefix, err)
-	}
+func Update(client kubernetes.Interface, configMap *corev1.ConfigMap) (*corev1.ConfigMap, error) {
+	return client.CoreV1().ConfigMaps(configMap.Namespace).Update(context.Background(), configMap, metav1.UpdateOptions{})
 }

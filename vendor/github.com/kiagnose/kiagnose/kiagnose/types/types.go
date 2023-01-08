@@ -13,28 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Copyright 2023 Red Hat, Inc.
+ * Copyright 2022 Red Hat, Inc.
  *
  */
 
-package main
+package types
 
-import (
-	"log"
-	"os"
-
-	"github.com/kiagnose/kiagnose/kiagnose/environment"
-
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg"
+const (
+	TimeoutKey         = "spec.timeout"
+	ParamNameKeyPrefix = "spec.param."
 )
 
-func main() {
-	log.Println("kubevirt-rt-checkup starting...")
-	rawEnv := environment.EnvToMap(os.Environ())
-
-	const errMessagePrefix = "kubevirt-rt-checkup failed"
-
-	if err := pkg.Run(rawEnv); err != nil {
-		log.Fatalf("%s: %v\n", errMessagePrefix, err)
-	}
-}
+const (
+	SucceededKey           = "status.succeeded"
+	FailureReasonKey       = "status.failureReason"
+	ResultsPrefix          = "status.result."
+	StartTimestampKey      = "status.startTimestamp"
+	CompletionTimestampKey = "status.completionTimestamp"
+)
