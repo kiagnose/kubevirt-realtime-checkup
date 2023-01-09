@@ -20,12 +20,16 @@
 package pkg
 
 import (
+	"context"
 	"log"
 
 	kconfig "github.com/kiagnose/kiagnose/kiagnose/config"
 
+	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/checkup"
 	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/client"
 	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/config"
+	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/launcher"
+	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/reporter"
 )
 
 func Run(rawEnv map[string]string) error {
@@ -46,7 +50,9 @@ func Run(rawEnv map[string]string) error {
 
 	printConfig(cfg)
 
-	return nil
+	l := launcher.New(checkup.New(), reporter.New())
+
+	return l.Run(context.Background())
 }
 
 func printConfig(checkupConfig config.Config) {
