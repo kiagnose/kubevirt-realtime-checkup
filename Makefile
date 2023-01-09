@@ -27,6 +27,6 @@ lint:
 	$(CONTAINER_ENGINE) run --rm -v $(PWD):$(PROJECT_WORKING_DIR):Z --workdir $(PROJECT_WORKING_DIR) $(LINTER_IMAGE_NAME):$(LINTER_IMAGE_TAG) golangci-lint run -v --timeout=3m ./cmd/... ./pkg/...
 .PHONY: lint
 
-push: build
+push:
 	$(CONTAINER_ENGINE) push $(CHECKUP_IMAGE_NAME):$(CHECKUP_IMAGE_TAG)
 .PHONY: push
