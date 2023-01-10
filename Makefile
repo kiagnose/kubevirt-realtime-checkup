@@ -25,7 +25,11 @@ build:
 .PHONY: build
 
 unit-test:
-	$(CONTAINER_ENGINE) run --rm -v $(PWD):$(PROJECT_WORKING_DIR):Z --workdir $(PROJECT_WORKING_DIR) $(GO_IMAGE_NAME):$(GO_IMAGE_TAG) go test -v ./cmd/... ./pkg/...
+	$(CONTAINER_ENGINE) run --rm \
+		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
+		--workdir $(PROJECT_WORKING_DIR) \
+		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
+		go test -v ./cmd/... ./pkg/...
 .PHONY: unit-test
 
 lint:
