@@ -33,7 +33,11 @@ unit-test:
 .PHONY: unit-test
 
 lint:
-	$(CONTAINER_ENGINE) run --rm -v $(PWD):$(PROJECT_WORKING_DIR):Z --workdir $(PROJECT_WORKING_DIR) $(LINTER_IMAGE_NAME):$(LINTER_IMAGE_TAG) golangci-lint run -v --timeout=3m ./cmd/... ./pkg/...
+	$(CONTAINER_ENGINE) run --rm \
+		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
+		--workdir $(PROJECT_WORKING_DIR) \
+		$(LINTER_IMAGE_NAME):$(LINTER_IMAGE_TAG) \
+		golangci-lint run -v --timeout=3m ./cmd/... ./pkg/...
 .PHONY: lint
 
 push:
