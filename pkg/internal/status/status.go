@@ -19,9 +19,15 @@
 
 package status
 
-import kstatus "github.com/kiagnose/kiagnose/kiagnose/status"
+import (
+	"time"
+
+	kstatus "github.com/kiagnose/kiagnose/kiagnose/status"
+)
 
 type Results struct {
+	Node            string
+	OslatMaxLatency time.Duration
 }
 
 type Status struct {
