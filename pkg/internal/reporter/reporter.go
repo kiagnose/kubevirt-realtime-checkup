@@ -19,15 +19,52 @@
 
 package reporter
 
-import "github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/status"
+import (
+	"fmt"
+
+	"k8s.io/client-go/kubernetes"
+
+	kreporter "github.com/kiagnose/kiagnose/kiagnose/reporter"
+
+	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/status"
+)
+
+const (
+	NodeKey            = "node"
+	OslatMaxLatencyKey = "oslatMaxLatencyMicroSeconds"
+)
 
 type Reporter struct {
+	kreporter.Reporter
 }
 
-func New() *Reporter {
-	return &Reporter{}
+func New(c kubernetes.Interface, configMapNamespace, configMapName string) *Reporter {
+	r := kreporter.New(c, configMapNamespace, configMapName)
+	return &Reporter{*r}
 }
 
 func (r *Reporter) Report(checkupStatus status.Status) error {
-	return nil
+	if !r.HasData() {
+		return r.Reporter.Report(checkupStatus.Status)
+	}
+
+	checkupStatus.Succeeded = len(checkupStatus.FailureReason) == 0
+
+	checkupStatus.Status.Results = formatResults(checkupStatus)
+
+	return r.Reporter.Report(checkupStatus.Status)
+}
+
+func formatResults(checkupStatus status.Status) map[string]string {
+	var emptyResults status.Results
+	if checkupStatus.Results == emptyResults {
+		return map[string]string{}
+	}
+
+	formattedResults := map[string]string{
+		NodeKey:            checkupStatus.Results.Node,
+		OslatMaxLatencyKey: fmt.Sprintf("%d", checkupStatus.Results.OslatMaxLatency.Microseconds()),
+	}
+
+	return formattedResults
 }

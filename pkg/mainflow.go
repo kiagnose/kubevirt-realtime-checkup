@@ -50,7 +50,7 @@ func Run(rawEnv map[string]string) error {
 
 	printConfig(cfg)
 
-	l := launcher.New(checkup.New(), reporter.New())
+	l := launcher.New(checkup.New(), reporter.New(c, baseConfig.ConfigMapNamespace, baseConfig.ConfigMapName))
 
 	return l.Run(context.Background())
 }
