@@ -15,8 +15,11 @@ all: lint unit-test build
 .PHONY: all
 
 build:
+	mkdir -p $(PWD)/go-cache
+
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
+		-v $(PWD)/go-cache:/root/.cache/go-build:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
 		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
 		go build -v -o ./bin/kubevirt-rt-checkup ./cmd/
@@ -25,8 +28,11 @@ build:
 .PHONY: build
 
 unit-test:
+	mkdir -p $(PWD)/go-cache
+
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
+		-v $(PWD)/go-cache:/root/.cache/go-build:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
 		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
 		go test -v ./cmd/... ./pkg/...
