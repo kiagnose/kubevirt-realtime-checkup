@@ -27,6 +27,17 @@ build:
 	$(CONTAINER_ENGINE) build . -t $(CHECKUP_IMAGE_NAME):$(CHECKUP_IMAGE_TAG)
 .PHONY: build
 
+vendor-deps:
+	mkdir -p $(PWD)/go-cache
+
+	$(CONTAINER_ENGINE) run --rm \
+		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
+		-v $(PWD)/go-cache:/root/.cache/go-build:Z \
+		--workdir $(PROJECT_WORKING_DIR) \
+		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
+		go mod tidy && go mod vendor
+.PHONY: vendor-deps
+
 unit-test:
 	mkdir -p $(PWD)/go-cache
 
