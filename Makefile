@@ -46,7 +46,7 @@ lint:
 		-v $(PWD)/linter-cache:/root/.cache:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
 		$(LINTER_IMAGE_NAME):$(LINTER_IMAGE_TAG) \
-		golangci-lint run -v --timeout=3m ./cmd/... ./pkg/...
+		golangci-lint run -v --timeout=3m ./cmd/... ./pkg/... ./tests...
 .PHONY: lint
 
 push:
