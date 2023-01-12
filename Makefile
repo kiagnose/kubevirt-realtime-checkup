@@ -44,7 +44,10 @@ e2e-test:
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
 		-v $(PWD)/go-cache:/root/.cache/go-build:Z \
+		-v $(HOME)/.kube:/root/.kube:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
+		-e TEST_NAMESPACE=$(TEST_NAMESPACE) \
+		-e TEST_IMAGE=$(TEST_IMAGE) \
 		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
 		go test -v ./tests/...
 .PHONY: e2e-test
