@@ -37,6 +37,7 @@ import (
 const (
 	testServiceAccountName              = "rt-checkup-sa"
 	testKiagnoseConfigMapAccessRoleName = "kiagnose-configmap-access"
+	testKubeVirtRTCheckerRoleName       = "kubevirt-rt-checker"
 	testConfigMapName                   = "rt-checkup-config"
 	testCheckupJobName                  = "rt-checkup"
 )
@@ -97,6 +98,8 @@ func setupCheckupPermissions() {
 		checkupServiceAccount              *corev1.ServiceAccount
 		kiagnoseConfigMapAccessRole        *rbacv1.Role
 		kiagnoseConfigMapAccessRoleBinding *rbacv1.RoleBinding
+		kubeVirtRTCheckerRole              *rbacv1.Role
+		kubeVirtRTCheckerRoleBinding       *rbacv1.RoleBinding
 	)
 
 	checkupServiceAccount = newServiceAccount()
@@ -153,6 +156,40 @@ func setupCheckupPermissions() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 	})
+
+	kubeVirtRTCheckerRole = newKubeVirtRTCheckerRole()
+	kubeVirtRTCheckerRole, err = client.RbacV1().Roles(testNamespace).Create(
+		context.Background(),
+		kubeVirtRTCheckerRole,
+		metav1.CreateOptions{},
+	)
+	Expect(err).NotTo(HaveOccurred())
+
+	DeferCleanup(func() {
+		err = client.RbacV1().Roles(kubeVirtRTCheckerRole.Namespace).Delete(
+			context.Background(),
+			kubeVirtRTCheckerRole.Name,
+			metav1.DeleteOptions{},
+		)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	kubeVirtRTCheckerRoleBinding = newRoleBinding(kubeVirtRTCheckerRole.Name, checkupServiceAccount.Name, kubeVirtRTCheckerRole.Name)
+	kubeVirtRTCheckerRoleBinding, err = client.RbacV1().RoleBindings(testNamespace).Create(
+		context.Background(),
+		kubeVirtRTCheckerRoleBinding,
+		metav1.CreateOptions{},
+	)
+	Expect(err).NotTo(HaveOccurred())
+
+	DeferCleanup(func() {
+		err = client.RbacV1().RoleBindings(kubeVirtRTCheckerRoleBinding.Namespace).Delete(
+			context.Background(),
+			kubeVirtRTCheckerRoleBinding.Name,
+			metav1.DeleteOptions{},
+		)
+		Expect(err).NotTo(HaveOccurred())
+	})
 }
 
 func newServiceAccount() *corev1.ServiceAccount {
@@ -173,6 +210,21 @@ func newKiagnoseConfigMapAccessRole() *rbacv1.Role {
 				APIGroups: []string{""},
 				Resources: []string{"configmaps"},
 				Verbs:     []string{"get", "update"},
+			},
+		},
+	}
+}
+
+func newKubeVirtRTCheckerRole() *rbacv1.Role {
+	return &rbacv1.Role{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testKubeVirtRTCheckerRoleName,
+		},
+		Rules: []rbacv1.PolicyRule{
+			{
+				APIGroups: []string{"kubevirt.io"},
+				Resources: []string{"virtualmachineinstances"},
+				Verbs:     []string{"create"},
 			},
 		},
 	}
