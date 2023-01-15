@@ -15,11 +15,11 @@ all: lint unit-test build
 .PHONY: all
 
 build:
-	mkdir -p $(PWD)/go-cache
+	mkdir -p $(PWD)/_go-cache
 
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
-		-v $(PWD)/go-cache:/root/.cache/go-build:Z \
+		-v $(PWD)/_go-cache:/root/.cache/go-build:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
 		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
 		go build -v -o ./bin/kubevirt-rt-checkup ./cmd/
@@ -28,33 +28,33 @@ build:
 .PHONY: build
 
 vendor-deps:
-	mkdir -p $(PWD)/go-cache
+	mkdir -p $(PWD)/_go-cache
 
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
-		-v $(PWD)/go-cache:/root/.cache/go-build:Z \
+		-v $(PWD)/_go-cache:/root/.cache/go-build:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
 		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
 		go mod tidy && go mod vendor
 .PHONY: vendor-deps
 
 unit-test:
-	mkdir -p $(PWD)/go-cache
+	mkdir -p $(PWD)/_go-cache
 
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
-		-v $(PWD)/go-cache:/root/.cache/go-build:Z \
+		-v $(PWD)/_go-cache:/root/.cache/go-build:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
 		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
 		go test -v ./cmd/... ./pkg/...
 .PHONY: unit-test
 
 e2e-test:
-	mkdir -p $(PWD)/go-cache
+	mkdir -p $(PWD)/_go-cache
 
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
-		-v $(PWD)/go-cache:/root/.cache/go-build:Z \
+		-v $(PWD)/_go-cache:/root/.cache/go-build:Z \
 		-v $(HOME)/.kube:/root/.kube:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
 		-e TEST_NAMESPACE=$(TEST_NAMESPACE) \
@@ -64,11 +64,11 @@ e2e-test:
 .PHONY: e2e-test
 
 lint:
-	mkdir -p $(PWD)/linter-cache
+	mkdir -p $(PWD)/_linter-cache
 
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
-		-v $(PWD)/linter-cache:/root/.cache:Z \
+		-v $(PWD)/_linter-cache:/root/.cache:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
 		$(LINTER_IMAGE_NAME):$(LINTER_IMAGE_TAG) \
 		golangci-lint run -v --timeout=3m ./cmd/... ./pkg/... ./tests...
