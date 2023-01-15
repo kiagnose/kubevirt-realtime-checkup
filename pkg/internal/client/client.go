@@ -20,12 +20,21 @@
 package client
 
 import (
+	"context"
+
 	"k8s.io/client-go/rest"
+
+	kvcorev1 "kubevirt.io/api/core/v1"
 	"kubevirt.io/client-go/kubecli"
 )
 
 type Client struct {
 	kubecli.KubevirtClient
+}
+
+type resultWrapper struct {
+	vmi *kvcorev1.VirtualMachineInstance
+	err error
 }
 
 func New() (*Client, error) {
@@ -40,4 +49,22 @@ func New() (*Client, error) {
 	}
 
 	return &Client{client}, nil
+}
+
+func (c *Client) CreateVirtualMachineInstance(ctx context.Context,
+	namespace string,
+	vmi *kvcorev1.VirtualMachineInstance) (*kvcorev1.VirtualMachineInstance, error) {
+	resultCh := make(chan resultWrapper, 1)
+
+	go func() {
+		createdVMI, err := c.KubevirtClient.VirtualMachineInstance(namespace).Create(vmi)
+		resultCh <- resultWrapper{createdVMI, err}
+	}()
+
+	select {
+	case result := <-resultCh:
+		return result.vmi, result.err
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 }
