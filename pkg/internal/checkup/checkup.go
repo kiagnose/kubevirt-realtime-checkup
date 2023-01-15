@@ -21,18 +21,46 @@ package checkup
 
 import (
 	"context"
+	"fmt"
 
+	k8srand "k8s.io/apimachinery/pkg/util/rand"
+
+	kvcorev1 "kubevirt.io/api/core/v1"
+
+	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/checkup/vmi"
+	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/config"
 	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/status"
 )
 
-type Checkup struct {
+type kubeVirtVMIClient interface {
+	CreateVirtualMachineInstance(ctx context.Context,
+		namespace string,
+		vmi *kvcorev1.VirtualMachineInstance) (*kvcorev1.VirtualMachineInstance, error)
 }
 
-func New() *Checkup {
-	return &Checkup{}
+type Checkup struct {
+	client    kubeVirtVMIClient
+	namespace string
+	vmi       *kvcorev1.VirtualMachineInstance
+}
+
+const VMINamePrefix = "rt-vmi"
+
+func New(client kubeVirtVMIClient, namespace string, checkupConfig config.Config) *Checkup {
+	return &Checkup{
+		client:    client,
+		namespace: namespace,
+		vmi:       newRealtimeVMI(checkupConfig),
+	}
 }
 
 func (c *Checkup) Setup(ctx context.Context) error {
+	createdVMI, err := c.client.CreateVirtualMachineInstance(ctx, c.namespace, c.vmi)
+	if err != nil {
+		return err
+	}
+	c.vmi = createdVMI
+
 	return nil
 }
 
@@ -46,4 +74,40 @@ func (c *Checkup) Teardown(ctx context.Context) error {
 
 func (c *Checkup) Results() status.Results {
 	return status.Results{}
+}
+
+func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
+	const (
+		rootDiskName      = "rootdisk"
+		cloudInitDiskName = "cloudinitdisk"
+		userData          = `#cloud-config
+password: redhat
+chpasswd:
+  expire: false
+user: user`
+	)
+
+	return vmi.New(randomizeName(VMINamePrefix),
+		vmi.WithoutCRIOCPULoadBalancing(),
+		vmi.WithoutCRIOCPUQuota(),
+		vmi.WithoutCRIOIRQLoadBalancing(),
+		vmi.WithRealtimeCPU(),
+		vmi.WithoutAutoAttachGraphicsDevice(),
+		vmi.WithoutAutoAttachMemBalloon(),
+		vmi.WithAutoAttachSerialConsole(),
+		vmi.WithHugePages(),
+		vmi.WithResources("3", "8Gi"),
+		vmi.WithZeroTerminationGracePeriodSeconds(),
+		vmi.WithNodeSelector(checkupConfig.TargetNode),
+		vmi.WithPVCVolume(rootDiskName, checkupConfig.GuestImageSourcePVCName),
+		vmi.WithVirtIODisk(rootDiskName),
+		vmi.WithCloudInitNoCloudVolume(cloudInitDiskName, userData),
+		vmi.WithVirtIODisk(cloudInitDiskName),
+	)
+}
+
+func randomizeName(prefix string) string {
+	const randomStringLen = 5
+
+	return fmt.Sprintf("%s-%s", prefix, k8srand.String(randomStringLen))
 }
