@@ -52,7 +52,10 @@ func Run(rawEnv map[string]string, namespace string) error {
 
 	l := launcher.New(checkup.New(), reporter.New(c, baseConfig.ConfigMapNamespace, baseConfig.ConfigMapName))
 
-	return l.Run(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), baseConfig.Timeout)
+	defer cancel()
+
+	return l.Run(ctx)
 }
 
 func printConfig(checkupConfig config.Config) {
