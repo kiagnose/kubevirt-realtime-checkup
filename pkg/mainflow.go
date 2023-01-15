@@ -32,7 +32,7 @@ import (
 	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/reporter"
 )
 
-func Run(rawEnv map[string]string) error {
+func Run(rawEnv map[string]string, namespace string) error {
 	c, err := client.New()
 	if err != nil {
 		return err
