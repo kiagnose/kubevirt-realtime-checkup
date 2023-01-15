@@ -34,7 +34,12 @@ func main() {
 
 	const errMessagePrefix = "kubevirt-rt-checkup failed"
 
-	if err := pkg.Run(rawEnv); err != nil {
+	namespace, err := environment.ReadNamespaceFile()
+	if err != nil {
+		log.Fatalf("%s: %v\n", errMessagePrefix, err)
+	}
+
+	if err = pkg.Run(rawEnv, namespace); err != nil {
 		log.Fatalf("%s: %v\n", errMessagePrefix, err)
 	}
 }
