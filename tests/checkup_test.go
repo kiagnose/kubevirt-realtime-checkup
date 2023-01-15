@@ -255,11 +255,11 @@ func newConfigMap() *corev1.ConfigMap {
 			Name: testConfigMapName,
 		},
 		Data: map[string]string{
-			"spec.timeout":                                 "1m",
-			"spec.param.targetNode":                        "my-node",
+			"spec.timeout":                                 "15m",
+			"spec.param.targetNode":                        "",
 			"spec.param.guestImageSourcePVCNamespace":      testNamespace,
-			"spec.param.guestImageSourcePVCName":           "my-rt-vm",
-			"spec.param.oslatDuration":                     "6m",
+			"spec.param.guestImageSourcePVCName":           "centos-8-rt",
+			"spec.param.oslatDuration":                     "10m",
 			"spec.param.oslatLatencyThresholdMicroSeconds": "45",
 		},
 	}
