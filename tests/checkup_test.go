@@ -209,6 +209,7 @@ func newCheckupJob() *batchv1.Job {
 						{
 							Name:            "rt-checkup",
 							Image:           testImageName,
+							ImagePullPolicy: corev1.PullAlways,
 							SecurityContext: newSecurityContext(),
 							Env: []corev1.EnvVar{
 								{
