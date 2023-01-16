@@ -167,9 +167,9 @@ func newKiagnoseConfigMapAccessRole() *rbacv1.Role {
 		},
 		Rules: []rbacv1.PolicyRule{
 			{
-				Verbs:     []string{"get", "update"},
 				APIGroups: []string{""},
 				Resources: []string{"configmaps"},
+				Verbs:     []string{"get", "update"},
 			},
 		},
 	}
