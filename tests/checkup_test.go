@@ -53,23 +53,23 @@ var _ = Describe("Checkup execution", func() {
 
 		var err error
 		configMap = newConfigMap()
-		_, err = client.CoreV1().ConfigMaps(testNamespace).Create(context.Background(), configMap, metav1.CreateOptions{})
+		configMap, err = client.CoreV1().ConfigMaps(testNamespace).Create(context.Background(), configMap, metav1.CreateOptions{})
 		Expect(err).NotTo(HaveOccurred())
 
 		DeferCleanup(func() {
-			err = client.CoreV1().ConfigMaps(testNamespace).Delete(context.Background(), testConfigMapName, metav1.DeleteOptions{})
+			err = client.CoreV1().ConfigMaps(configMap.Namespace).Delete(context.Background(), configMap.Name, metav1.DeleteOptions{})
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		checkupJob = newCheckupJob()
-		_, err = client.BatchV1().Jobs(testNamespace).Create(context.Background(), checkupJob, metav1.CreateOptions{})
+		checkupJob, err = client.BatchV1().Jobs(testNamespace).Create(context.Background(), checkupJob, metav1.CreateOptions{})
 		Expect(err).NotTo(HaveOccurred())
 
 		DeferCleanup(func() {
 			backgroundPropagationPolicy := metav1.DeletePropagationBackground
-			err = client.BatchV1().Jobs(testNamespace).Delete(
+			err = client.BatchV1().Jobs(checkupJob.Namespace).Delete(
 				context.Background(),
-				testCheckupJobName,
+				checkupJob.Name,
 				metav1.DeleteOptions{PropagationPolicy: &backgroundPropagationPolicy},
 			)
 			Expect(err).NotTo(HaveOccurred())
@@ -101,25 +101,41 @@ func setupCheckupPermissions() {
 	)
 
 	checkupServiceAccount = newServiceAccount()
-	_, err = client.CoreV1().ServiceAccounts(testNamespace).Create(context.Background(), checkupServiceAccount, metav1.CreateOptions{})
+	checkupServiceAccount, err = client.CoreV1().ServiceAccounts(testNamespace).Create(
+		context.Background(),
+		checkupServiceAccount,
+		metav1.CreateOptions{},
+	)
 	Expect(err).NotTo(HaveOccurred())
 
 	DeferCleanup(func() {
-		err = client.CoreV1().ServiceAccounts(testNamespace).Delete(context.Background(), testServiceAccountName, metav1.DeleteOptions{})
+		err = client.CoreV1().ServiceAccounts(checkupServiceAccount.Namespace).Delete(
+			context.Background(),
+			checkupServiceAccount.Name,
+			metav1.DeleteOptions{},
+		)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
 	kiagnoseConfigMapAccessRole = newKiagnoseConfigMapAccessRole()
-	_, err = client.RbacV1().Roles(testNamespace).Create(context.Background(), kiagnoseConfigMapAccessRole, metav1.CreateOptions{})
+	kiagnoseConfigMapAccessRole, err = client.RbacV1().Roles(testNamespace).Create(
+		context.Background(),
+		kiagnoseConfigMapAccessRole,
+		metav1.CreateOptions{},
+	)
 	Expect(err).NotTo(HaveOccurred())
 
 	DeferCleanup(func() {
-		err = client.RbacV1().Roles(testNamespace).Delete(context.Background(), testKiagnoseConfigMapAccessRoleName, metav1.DeleteOptions{})
+		err = client.RbacV1().Roles(kiagnoseConfigMapAccessRole.Namespace).Delete(
+			context.Background(),
+			kiagnoseConfigMapAccessRole.Name,
+			metav1.DeleteOptions{},
+		)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
 	kiagnoseConfigMapAccessRoleBinding = newKiagnoseConfigMapAccessRoleBinding()
-	_, err = client.RbacV1().RoleBindings(testNamespace).Create(
+	kiagnoseConfigMapAccessRoleBinding, err = client.RbacV1().RoleBindings(testNamespace).Create(
 		context.Background(),
 		kiagnoseConfigMapAccessRoleBinding,
 		metav1.CreateOptions{},
@@ -127,9 +143,9 @@ func setupCheckupPermissions() {
 	Expect(err).NotTo(HaveOccurred())
 
 	DeferCleanup(func() {
-		err = client.RbacV1().RoleBindings(testNamespace).Delete(
+		err = client.RbacV1().RoleBindings(kiagnoseConfigMapAccessRoleBinding.Namespace).Delete(
 			context.Background(),
-			testKiagnoseConfigMapAccessRoleBindingName,
+			kiagnoseConfigMapAccessRoleBinding.Name,
 			metav1.DeleteOptions{},
 		)
 		Expect(err).NotTo(HaveOccurred())
