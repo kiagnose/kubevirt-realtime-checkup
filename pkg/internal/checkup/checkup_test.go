@@ -22,11 +22,14 @@ package checkup_test
 import (
 	"context"
 	"errors"
-	"fmt"
+	"strings"
 	"testing"
 	"time"
 
 	assert "github.com/stretchr/testify/require"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	kvcorev1 "kubevirt.io/api/core/v1"
 
@@ -49,6 +52,11 @@ func TestCheckupShouldSucceed(t *testing.T) {
 	assert.NoError(t, testCheckup.Run(context.Background()))
 	assert.NoError(t, testCheckup.Teardown(context.Background()))
 
+	vmiName := testClient.VMIName()
+	assert.NotEmpty(t, vmiName)
+	_, err := testClient.GetVirtualMachineInstance(context.Background(), testNamespace, vmiName)
+	assert.ErrorContains(t, err, "not found")
+
 	actualResults := testCheckup.Results()
 	expectedResults := status.Results{}
 
@@ -67,9 +75,26 @@ func TestSetupShouldFail(t *testing.T) {
 	})
 }
 
+func TestTeardownShouldFailWhen(t *testing.T) {
+	t.Run("VMI deletion fails", func(t *testing.T) {
+		expectedVMIDeletionFailure := errors.New("failed to delete VMI")
+
+		testClient := newClientStub()
+		testClient.vmiDeletionFailure = expectedVMIDeletionFailure
+		testCheckup := checkup.New(testClient, testNamespace, newTestConfig())
+
+		assert.NoError(t, testCheckup.Setup(context.Background()))
+		assert.NoError(t, testCheckup.Run(context.Background()))
+
+		assert.ErrorContains(t, testCheckup.Teardown(context.Background()), expectedVMIDeletionFailure.Error())
+	})
+}
+
 type clientStub struct {
 	createdVMIs        map[string]*kvcorev1.VirtualMachineInstance
 	vmiCreationFailure error
+	vmiReadFailure     error
+	vmiDeletionFailure error
 }
 
 func newClientStub() *clientStub {
@@ -85,10 +110,45 @@ func (cs *clientStub) CreateVirtualMachineInstance(_ context.Context,
 		return nil, cs.vmiCreationFailure
 	}
 
-	vmiFullName := fmt.Sprintf("%s/%s", namespace, vmi.Name)
+	vmiFullName := checkup.ObjectFullName(namespace, vmi.Name)
 	cs.createdVMIs[vmiFullName] = vmi
 
 	return vmi, nil
+}
+
+func (cs *clientStub) GetVirtualMachineInstance(_ context.Context, namespace, name string) (*kvcorev1.VirtualMachineInstance, error) {
+	if cs.vmiReadFailure != nil {
+		return nil, cs.vmiReadFailure
+	}
+
+	vmiFullName := checkup.ObjectFullName(namespace, name)
+	vmi, exist := cs.createdVMIs[vmiFullName]
+	if !exist {
+		return nil, k8serrors.NewNotFound(schema.GroupResource{Group: "kubevirt.io", Resource: "virtualmachineinstances"}, name)
+	}
+
+	return vmi, nil
+}
+
+func (cs *clientStub) DeleteVirtualMachineInstance(_ context.Context, namespace, name string) error {
+	if cs.vmiDeletionFailure != nil {
+		return cs.vmiDeletionFailure
+	}
+
+	vmiFullName := checkup.ObjectFullName(namespace, name)
+	delete(cs.createdVMIs, vmiFullName)
+
+	return nil
+}
+
+func (cs *clientStub) VMIName() string {
+	for vmiName := range cs.createdVMIs {
+		if strings.Contains(vmiName, checkup.VMINamePrefix) {
+			return vmiName
+		}
+	}
+
+	return ""
 }
 
 func newTestConfig() config.Config {

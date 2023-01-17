@@ -22,6 +22,7 @@ package checkup
 import (
 	"context"
 	"fmt"
+	"log"
 
 	k8srand "k8s.io/apimachinery/pkg/util/rand"
 
@@ -36,6 +37,7 @@ type kubeVirtVMIClient interface {
 	CreateVirtualMachineInstance(ctx context.Context,
 		namespace string,
 		vmi *kvcorev1.VirtualMachineInstance) (*kvcorev1.VirtualMachineInstance, error)
+	DeleteVirtualMachineInstance(ctx context.Context, namespace, name string) error
 }
 
 type Checkup struct {
@@ -69,11 +71,33 @@ func (c *Checkup) Run(ctx context.Context) error {
 }
 
 func (c *Checkup) Teardown(ctx context.Context) error {
+	const errPrefix = "teardown"
+
+	if err := c.deleteVMI(ctx); err != nil {
+		return fmt.Errorf("%s: %w", errPrefix, err)
+	}
+
 	return nil
 }
 
 func (c *Checkup) Results() status.Results {
 	return status.Results{}
+}
+
+func (c *Checkup) deleteVMI(ctx context.Context) error {
+	if c.vmi == nil {
+		return fmt.Errorf("failed to delete VMI, object doesn't exist")
+	}
+
+	vmiFullName := ObjectFullName(c.vmi.Namespace, c.vmi.Name)
+
+	log.Printf("Trying to delete VMI: %q", vmiFullName)
+	if err := c.client.DeleteVirtualMachineInstance(ctx, c.vmi.Namespace, c.vmi.Name); err != nil {
+		log.Printf("Failed to delete VMI: %q", vmiFullName)
+		return err
+	}
+
+	return nil
 }
 
 func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
@@ -110,4 +134,8 @@ func randomizeName(prefix string) string {
 	const randomStringLen = 5
 
 	return fmt.Sprintf("%s-%s", prefix, k8srand.String(randomStringLen))
+}
+
+func ObjectFullName(namespace, name string) string {
+	return fmt.Sprintf("%s/%s", namespace, name)
 }
