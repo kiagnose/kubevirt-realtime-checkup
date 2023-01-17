@@ -22,6 +22,7 @@ package client
 import (
 	"context"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 
 	kvcorev1 "kubevirt.io/api/core/v1"
@@ -66,5 +67,21 @@ func (c *Client) CreateVirtualMachineInstance(ctx context.Context,
 		return result.vmi, result.err
 	case <-ctx.Done():
 		return nil, ctx.Err()
+	}
+}
+
+func (c *Client) DeleteVirtualMachineInstance(ctx context.Context, namespace, name string) error {
+	resultCh := make(chan error, 1)
+
+	go func() {
+		err := c.KubevirtClient.VirtualMachineInstance(namespace).Delete(name, &metav1.DeleteOptions{})
+		resultCh <- err
+	}()
+
+	select {
+	case err := <-resultCh:
+		return err
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }
