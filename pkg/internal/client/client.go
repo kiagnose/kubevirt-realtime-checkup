@@ -70,6 +70,22 @@ func (c *Client) CreateVirtualMachineInstance(ctx context.Context,
 	}
 }
 
+func (c *Client) GetVirtualMachineInstance(ctx context.Context, namespace, name string) (*kvcorev1.VirtualMachineInstance, error) {
+	resultCh := make(chan resultWrapper, 1)
+
+	go func() {
+		vmi, err := c.KubevirtClient.VirtualMachineInstance(namespace).Get(name, &metav1.GetOptions{})
+		resultCh <- resultWrapper{vmi, err}
+	}()
+
+	select {
+	case result := <-resultCh:
+		return result.vmi, result.err
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
 func (c *Client) DeleteVirtualMachineInstance(ctx context.Context, namespace, name string) error {
 	resultCh := make(chan error, 1)
 
