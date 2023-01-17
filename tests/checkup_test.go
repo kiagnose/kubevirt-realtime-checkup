@@ -224,7 +224,7 @@ func newKubeVirtRTCheckerRole() *rbacv1.Role {
 			{
 				APIGroups: []string{"kubevirt.io"},
 				Resources: []string{"virtualmachineinstances"},
-				Verbs:     []string{"create", "delete"},
+				Verbs:     []string{"create", "get", "delete"},
 			},
 		},
 	}
