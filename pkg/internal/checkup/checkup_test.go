@@ -95,13 +95,12 @@ func TestTeardownShouldFailWhen(t *testing.T) {
 		expectedReadFailure := errors.New("failed to read VMI")
 
 		testClient := newClientStub()
-		testClient.vmiReadFailure = expectedReadFailure
-
 		testCheckup := checkup.New(testClient, testNamespace, newTestConfig())
 
 		assert.NoError(t, testCheckup.Setup(context.Background()))
 		assert.NoError(t, testCheckup.Run(context.Background()))
 
+		testClient.vmiReadFailure = expectedReadFailure
 		assert.ErrorContains(t, testCheckup.Teardown(context.Background()), expectedReadFailure.Error())
 	})
 }
