@@ -28,6 +28,7 @@ import (
 
 	assert "github.com/stretchr/testify/require"
 
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -49,11 +50,13 @@ func TestCheckupShouldSucceed(t *testing.T) {
 	testCheckup := checkup.New(testClient, testNamespace, newTestConfig())
 
 	assert.NoError(t, testCheckup.Setup(context.Background()))
-	assert.NoError(t, testCheckup.Run(context.Background()))
-	assert.NoError(t, testCheckup.Teardown(context.Background()))
 
 	vmiName := testClient.VMIName()
 	assert.NotEmpty(t, vmiName)
+
+	assert.NoError(t, testCheckup.Run(context.Background()))
+	assert.NoError(t, testCheckup.Teardown(context.Background()))
+
 	_, err := testClient.GetVirtualMachineInstance(context.Background(), testNamespace, vmiName)
 	assert.ErrorContains(t, err, "not found")
 
@@ -72,6 +75,17 @@ func TestSetupShouldFail(t *testing.T) {
 		testCheckup := checkup.New(testClient, testNamespace, newTestConfig())
 
 		assert.ErrorContains(t, testCheckup.Setup(context.Background()), expectedVMICreationFailure.Error())
+	})
+
+	t.Run("when wait for VMI to boot fails", func(t *testing.T) {
+		expectedVMIReadFailure := errors.New("failed to read VMI")
+
+		testClient := newClientStub()
+		testConfig := newTestConfig()
+		testClient.vmiReadFailure = expectedVMIReadFailure
+		testCheckup := checkup.New(testClient, testNamespace, testConfig)
+
+		assert.ErrorContains(t, testCheckup.Setup(context.Background()), expectedVMIReadFailure.Error())
 	})
 }
 
@@ -93,13 +107,12 @@ func TestTeardownShouldFailWhen(t *testing.T) {
 		expectedReadFailure := errors.New("failed to read VMI")
 
 		testClient := newClientStub()
-		testClient.vmiReadFailure = expectedReadFailure
-
 		testCheckup := checkup.New(testClient, testNamespace, newTestConfig())
 
 		assert.NoError(t, testCheckup.Setup(context.Background()))
 		assert.NoError(t, testCheckup.Run(context.Background()))
 
+		testClient.vmiReadFailure = expectedReadFailure
 		assert.ErrorContains(t, testCheckup.Teardown(context.Background()), expectedReadFailure.Error())
 	})
 }
@@ -124,8 +137,15 @@ func (cs *clientStub) CreateVirtualMachineInstance(_ context.Context,
 		return nil, cs.vmiCreationFailure
 	}
 
-	vmiFullName := checkup.ObjectFullName(namespace, vmi.Name)
+	vmi.Namespace = namespace
+
+	vmiFullName := checkup.ObjectFullName(vmi.Namespace, vmi.Name)
 	cs.createdVMIs[vmiFullName] = vmi
+
+	vmi.Status.Conditions = append(vmi.Status.Conditions, kvcorev1.VirtualMachineInstanceCondition{
+		Type:   kvcorev1.VirtualMachineInstanceAgentConnected,
+		Status: corev1.ConditionTrue,
+	})
 
 	return vmi, nil
 }
@@ -150,15 +170,20 @@ func (cs *clientStub) DeleteVirtualMachineInstance(_ context.Context, namespace,
 	}
 
 	vmiFullName := checkup.ObjectFullName(namespace, name)
+	_, exist := cs.createdVMIs[vmiFullName]
+	if !exist {
+		return k8serrors.NewNotFound(schema.GroupResource{Group: "kubevirt.io", Resource: "virtualmachineinstances"}, name)
+	}
+
 	delete(cs.createdVMIs, vmiFullName)
 
 	return nil
 }
 
 func (cs *clientStub) VMIName() string {
-	for vmiName := range cs.createdVMIs {
-		if strings.Contains(vmiName, checkup.VMINamePrefix) {
-			return vmiName
+	for _, vmi := range cs.createdVMIs {
+		if strings.Contains(vmi.Name, checkup.VMINamePrefix) {
+			return vmi.Name
 		}
 	}
 
