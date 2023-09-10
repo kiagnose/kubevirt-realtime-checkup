@@ -20,7 +20,7 @@ const (
 
 const (
 	defaultNamespace = "kiagnose-demo"
-	defaultImageName = "quay.io/kiagnose/kubevirt-rt-checkup:main"
+	defaultImageName = "quay.io/kiagnose/kubevirt-realtime-checkup:main"
 )
 
 var (

@@ -26,8 +26,8 @@ import (
 
 	assert "github.com/stretchr/testify/require"
 
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/launcher"
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/status"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/launcher"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/status"
 )
 
 var (

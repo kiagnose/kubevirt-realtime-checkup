@@ -27,7 +27,7 @@ import (
 
 	kconfig "github.com/kiagnose/kiagnose/kiagnose/config"
 
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/config"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/config"
 )
 
 const (

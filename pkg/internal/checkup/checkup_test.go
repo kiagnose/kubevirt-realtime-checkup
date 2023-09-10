@@ -33,9 +33,9 @@ import (
 
 	kvcorev1 "kubevirt.io/api/core/v1"
 
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/checkup"
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/config"
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/status"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/checkup"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/config"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/status"
 )
 
 const (

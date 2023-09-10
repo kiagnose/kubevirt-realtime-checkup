@@ -25,14 +25,14 @@ import (
 
 	"github.com/kiagnose/kiagnose/kiagnose/environment"
 
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg"
 )
 
 func main() {
-	log.Println("kubevirt-rt-checkup starting...")
+	log.Println("kubevirt-realtime-checkup starting...")
 	rawEnv := environment.EnvToMap(os.Environ())
 
-	const errMessagePrefix = "kubevirt-rt-checkup failed"
+	const errMessagePrefix = "kubevirt-realtime-checkup failed"
 
 	namespace, err := environment.ReadNamespaceFile()
 	if err != nil {
