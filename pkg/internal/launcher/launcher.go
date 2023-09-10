@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/status"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/status"
 )
 
 type checkup interface {

@@ -1,4 +1,4 @@
-module github.com/kiagnose/kubevirt-rt-checkup
+module github.com/kiagnose/kubevirt-realtime-checkup
 
 go 1.19
 

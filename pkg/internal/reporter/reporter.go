@@ -26,7 +26,7 @@ import (
 
 	kreporter "github.com/kiagnose/kiagnose/kiagnose/reporter"
 
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/status"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/status"
 )
 
 const (

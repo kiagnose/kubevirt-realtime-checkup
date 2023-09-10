@@ -34,8 +34,8 @@ import (
 
 	kconfigmap "github.com/kiagnose/kiagnose/kiagnose/configmap"
 
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/reporter"
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/status"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/reporter"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/status"
 )
 
 const (

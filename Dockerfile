@@ -5,8 +5,8 @@ RUN microdnf install -y shadow-utils && \
     microdnf remove -y shadow-utils && \
     microdnf clean all
 
-COPY ./bin/kubevirt-rt-checkup /usr/local/bin
+COPY ./bin/kubevirt-realtime-checkup /usr/local/bin
 
 USER 900
 
-ENTRYPOINT ["kubevirt-rt-checkup"]
+ENTRYPOINT ["kubevirt-realtime-checkup"]

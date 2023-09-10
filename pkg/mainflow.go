@@ -25,11 +25,11 @@ import (
 
 	kconfig "github.com/kiagnose/kiagnose/kiagnose/config"
 
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/checkup"
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/client"
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/config"
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/launcher"
-	"github.com/kiagnose/kubevirt-rt-checkup/pkg/internal/reporter"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/checkup"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/client"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/config"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/launcher"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/reporter"
 )
 
 func Run(rawEnv map[string]string, namespace string) error {
