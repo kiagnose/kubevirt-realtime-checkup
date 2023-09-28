@@ -109,3 +109,7 @@ build-vm-image: build-vm-image-builder
 build-vm-container-disk: build-vm-image
 	$(CONTAINER_ENGINE) build $(CURDIR) -f $(CURDIR)/vms/vm-under-test/Dockerfile -t $(REG)/$(ORG)/$(VM_CONTAINER_DISK_IMAGE_NAME):$(VM_CONTAINER_DISK_IMAGE_TAG)
 .PHONY: build-vm-container-disk
+
+push-vm-container-disk:
+	$(CONTAINER_ENGINE) push $(REG)/$(ORG)/$(VM_CONTAINER_DISK_IMAGE_NAME):$(VM_CONTAINER_DISK_IMAGE_TAG)
+.PHONY: push-vm-container-disk
