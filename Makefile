@@ -1,7 +1,13 @@
 CONTAINER_ENGINE ?= podman
 
+REG ?= quay.io
+ORG ?= kiagnose
+
 CHECKUP_IMAGE_NAME ?= quay.io/kiagnose/kubevirt-realtime-checkup
 CHECKUP_IMAGE_TAG ?= devel
+
+VM_IMAGE_BUILDER_IMAGE_NAME := kubevirt-realtime-checkup-vm-image-builder
+VM_IMAGE_BUILDER_IMAGE_TAG ?= latest
 
 GO_IMAGE_NAME := docker.io/library/golang
 GO_IMAGE_TAG := 1.19.4-bullseye
@@ -77,3 +83,7 @@ lint:
 push:
 	$(CONTAINER_ENGINE) push $(CHECKUP_IMAGE_NAME):$(CHECKUP_IMAGE_TAG)
 .PHONY: push
+
+build-vm-image-builder:
+	$(CONTAINER_ENGINE) build $(CURDIR)/vms/image-builder -f $(CURDIR)/vms/image-builder/Dockerfile -t $(REG)/$(ORG)/$(VM_IMAGE_BUILDER_IMAGE_NAME):$(VM_IMAGE_BUILDER_IMAGE_TAG)
+.PHONY: build-vm-image-builder
