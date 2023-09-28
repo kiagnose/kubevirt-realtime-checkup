@@ -1,0 +1,29 @@
+name: Publish VM ContainerDisk
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+
+ # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  publish_containerDisk_image:
+    name: Build and publish VM ContainerDisk Image
+    runs-on: ubuntu-latest
+    env:
+      VM_CONTAINER_DISK_IMAGE_TAG: ${{github.ref_name}}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Build the ContainerDisk image
+        run: make build-vm-container-disk
+      - name: Login to quay.io
+        run:
+          podman login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
+      - name: Publish
+        run:
+          make push-vm-container-disk
