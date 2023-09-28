@@ -12,6 +12,9 @@ VM_IMAGE_BUILDER_IMAGE_TAG ?= latest
 VIRT_BUILDER_CACHE_DIR := $(CURDIR)/_virt_builder/cache
 VIRT_BUILDER_OUTPUT_DIR := $(CURDIR)/_virt_builder/output
 
+VM_CONTAINER_DISK_IMAGE_NAME := kubevirt-realtime-checkup-vm
+VM_CONTAINER_DISK_IMAGE_TAG ?= latest
+
 GO_IMAGE_NAME := docker.io/library/golang
 GO_IMAGE_TAG := 1.19.4-bullseye
 
@@ -102,3 +105,7 @@ build-vm-image: build-vm-image-builder
       $(REG)/$(ORG)/$(VM_IMAGE_BUILDER_IMAGE_NAME):$(VM_IMAGE_BUILDER_IMAGE_TAG) \
       /root/scripts/build-vm-image
 .PHONY: build-vm-image
+
+build-vm-container-disk: build-vm-image
+	$(CONTAINER_ENGINE) build $(CURDIR) -f $(CURDIR)/vms/vm-under-test/Dockerfile -t $(REG)/$(ORG)/$(VM_CONTAINER_DISK_IMAGE_NAME):$(VM_CONTAINER_DISK_IMAGE_TAG)
+.PHONY: build-vm-container-disk
