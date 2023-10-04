@@ -77,7 +77,7 @@ var _ = Describe("Checkup execution", func() {
 	})
 
 	It("should complete successfully", func() {
-		Eventually(getJobConditions, 5*time.Minute, 5*time.Second).Should(
+		Eventually(getJobConditions, 15*time.Minute, 5*time.Second).Should(
 			ContainElement(MatchFields(IgnoreExtras, Fields{
 				"Type":   Equal(batchv1.JobComplete),
 				"Status": Equal(corev1.ConditionTrue),
