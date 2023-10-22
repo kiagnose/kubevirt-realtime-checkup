@@ -62,13 +62,17 @@ func New(client kubeVirtVMIClient, namespace string, checkupConfig config.Config
 }
 
 func (c *Checkup) Setup(ctx context.Context) error {
-	createdVMI, err := c.client.CreateVirtualMachineInstance(ctx, c.namespace, c.vmi)
+	const setupTimeout = 10 * time.Minute
+	setupCtx, cancel := context.WithTimeout(ctx, setupTimeout)
+	defer cancel()
+
+	createdVMI, err := c.client.CreateVirtualMachineInstance(setupCtx, c.namespace, c.vmi)
 	if err != nil {
 		return err
 	}
 	c.vmi = createdVMI
 
-	if err := c.waitForVMIToBoot(ctx); err != nil {
+	if err := c.waitForVMIToBoot(setupCtx); err != nil {
 		return err
 	}
 
