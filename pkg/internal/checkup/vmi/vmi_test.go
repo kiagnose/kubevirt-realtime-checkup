@@ -237,31 +237,6 @@ func TestNewWithTerminationGracePeriodSeconds(t *testing.T) {
 	assert.Equal(t, expectedVMI, actualVMI)
 }
 
-func TestNewWithPVCVolume(t *testing.T) {
-	const (
-		volumeName = "rootdisk"
-		pvcName    = "centos-8-rt"
-	)
-
-	actualVMI := vmi.New(testVMIName, vmi.WithPVCVolume(volumeName, pvcName))
-
-	expectedVMI := newBaseVMI()
-	expectedVMI.Spec.Volumes = []kvcorev1.Volume{
-		{
-			Name: volumeName,
-			VolumeSource: kvcorev1.VolumeSource{
-				PersistentVolumeClaim: &kvcorev1.PersistentVolumeClaimVolumeSource{
-					PersistentVolumeClaimVolumeSource: corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: pvcName,
-					},
-				},
-			},
-		},
-	}
-
-	assert.Equal(t, expectedVMI, actualVMI)
-}
-
 func TestNewWithCloudInitNoCloudVolume(t *testing.T) {
 	const (
 		volumeName = "rootdisk"

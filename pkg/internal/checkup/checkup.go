@@ -189,7 +189,7 @@ user: user`
 		vmi.WithResources("3", "8Gi"),
 		vmi.WithZeroTerminationGracePeriodSeconds(),
 		vmi.WithNodeSelector(checkupConfig.TargetNode),
-		vmi.WithPVCVolume(rootDiskName, checkupConfig.GuestImageSourcePVCName),
+		vmi.WithContainerDisk(rootDiskName, checkupConfig.VMUnderTestContainerDiskImage),
 		vmi.WithVirtIODisk(rootDiskName),
 		vmi.WithCloudInitNoCloudVolume(cloudInitDiskName, userData),
 		vmi.WithVirtIODisk(cloudInitDiskName),

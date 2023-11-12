@@ -197,23 +197,6 @@ func WithZeroTerminationGracePeriodSeconds() Option {
 	}
 }
 
-func WithPVCVolume(volumeName, pvcName string) Option {
-	return func(vmi *kvcorev1.VirtualMachineInstance) {
-		newVolume := kvcorev1.Volume{
-			Name: volumeName,
-			VolumeSource: kvcorev1.VolumeSource{
-				PersistentVolumeClaim: &kvcorev1.PersistentVolumeClaimVolumeSource{
-					PersistentVolumeClaimVolumeSource: corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: pvcName,
-					},
-				},
-			},
-		}
-
-		vmi.Spec.Volumes = append(vmi.Spec.Volumes, newVolume)
-	}
-}
-
 func WithContainerDisk(volumeName, imageName string) Option {
 	return func(vmi *kvcorev1.VirtualMachineInstance) {
 		newVolume := kvcorev1.Volume{
