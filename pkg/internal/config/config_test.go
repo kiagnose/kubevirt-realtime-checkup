@@ -34,6 +34,7 @@ const (
 	testPodName                           = "my-pod"
 	testPodUID                            = "0123456789-0123456789"
 	testTargetNodeName                    = "my-rt-node"
+	testVMContainerDiskImage              = "quay.io/myorg/kubevirt-realtime-checkup-vm:latest"
 	testGuestImageSourcePVCNamespace      = "rt-namespace"
 	testGuestImageSourcePVCName           = "my-rt-vm"
 	testOslatDuration                     = "1h"
@@ -51,13 +52,14 @@ func TestNewShouldApplyDefaultsWhenOptionalFieldsAreMissing(t *testing.T) {
 	assert.NoError(t, err)
 
 	expectedConfig := config.Config{
-		PodName:                      testPodName,
-		PodUID:                       testPodUID,
-		TargetNode:                   "",
-		GuestImageSourcePVCNamespace: "",
-		GuestImageSourcePVCName:      "",
-		OslatDuration:                config.OslatDefaultDuration,
-		OslatLatencyThreshold:        config.OslatDefaultLatencyThreshold,
+		PodName:                       testPodName,
+		PodUID:                        testPodUID,
+		TargetNode:                    "",
+		VMUnderTestContainerDiskImage: config.VMUnderTestDefaultContainerDiskImage,
+		GuestImageSourcePVCNamespace:  "",
+		GuestImageSourcePVCName:       "",
+		OslatDuration:                 config.OslatDefaultDuration,
+		OslatLatencyThreshold:         config.OslatDefaultLatencyThreshold,
 	}
 	assert.Equal(t, expectedConfig, actualConfig)
 }
@@ -67,11 +69,12 @@ func TestNewShouldApplyUserConfig(t *testing.T) {
 		PodName: testPodName,
 		PodUID:  testPodUID,
 		Params: map[string]string{
-			config.TargetNodeParamName:                   testTargetNodeName,
-			config.GuestImageSourcePVCNamespaceParamName: testGuestImageSourcePVCNamespace,
-			config.GuestImageSourcePVCNameParamName:      testGuestImageSourcePVCName,
-			config.OslatDurationParamName:                testOslatDuration,
-			config.OslatLatencyThresholdParamName:        testOslatLatencyThresholdMicroSeconds,
+			config.TargetNodeParamName:                    testTargetNodeName,
+			config.VMUnderTestContainerDiskImageParamName: testVMContainerDiskImage,
+			config.GuestImageSourcePVCNamespaceParamName:  testGuestImageSourcePVCNamespace,
+			config.GuestImageSourcePVCNameParamName:       testGuestImageSourcePVCName,
+			config.OslatDurationParamName:                 testOslatDuration,
+			config.OslatLatencyThresholdParamName:         testOslatLatencyThresholdMicroSeconds,
 		},
 	}
 
@@ -79,13 +82,14 @@ func TestNewShouldApplyUserConfig(t *testing.T) {
 	assert.NoError(t, err)
 
 	expectedConfig := config.Config{
-		PodName:                      testPodName,
-		PodUID:                       testPodUID,
-		TargetNode:                   testTargetNodeName,
-		GuestImageSourcePVCNamespace: testGuestImageSourcePVCNamespace,
-		GuestImageSourcePVCName:      testGuestImageSourcePVCName,
-		OslatDuration:                time.Hour,
-		OslatLatencyThreshold:        50 * time.Microsecond,
+		PodName:                       testPodName,
+		PodUID:                        testPodUID,
+		TargetNode:                    testTargetNodeName,
+		VMUnderTestContainerDiskImage: testVMContainerDiskImage,
+		GuestImageSourcePVCNamespace:  testGuestImageSourcePVCNamespace,
+		GuestImageSourcePVCName:       testGuestImageSourcePVCName,
+		OslatDuration:                 time.Hour,
+		OslatLatencyThreshold:         50 * time.Microsecond,
 	}
 	assert.Equal(t, expectedConfig, actualConfig)
 }

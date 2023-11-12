@@ -28,16 +28,18 @@ import (
 )
 
 const (
-	TargetNodeParamName                   = "targetNode"
-	GuestImageSourcePVCNamespaceParamName = "guestImageSourcePVCNamespace"
-	GuestImageSourcePVCNameParamName      = "guestImageSourcePVCName"
-	OslatDurationParamName                = "oslatDuration"
-	OslatLatencyThresholdParamName        = "oslatLatencyThresholdMicroSeconds"
+	TargetNodeParamName                    = "targetNode"
+	VMUnderTestContainerDiskImageParamName = "vmUnderTestContainerDiskImage"
+	GuestImageSourcePVCNamespaceParamName  = "guestImageSourcePVCNamespace"
+	GuestImageSourcePVCNameParamName       = "guestImageSourcePVCName"
+	OslatDurationParamName                 = "oslatDuration"
+	OslatLatencyThresholdParamName         = "oslatLatencyThresholdMicroSeconds"
 )
 
 const (
-	OslatDefaultDuration         = 5 * time.Minute
-	OslatDefaultLatencyThreshold = 40 * time.Microsecond
+	VMUnderTestDefaultContainerDiskImage = "quay.io/kiagnose/kubevirt-realtime-checkup-vm:main"
+	OslatDefaultDuration                 = 5 * time.Minute
+	OslatDefaultLatencyThreshold         = 40 * time.Microsecond
 )
 
 var (
@@ -46,24 +48,30 @@ var (
 )
 
 type Config struct {
-	PodName                      string
-	PodUID                       string
-	TargetNode                   string
-	GuestImageSourcePVCNamespace string
-	GuestImageSourcePVCName      string
-	OslatDuration                time.Duration
-	OslatLatencyThreshold        time.Duration
+	PodName                       string
+	PodUID                        string
+	TargetNode                    string
+	VMUnderTestContainerDiskImage string
+	GuestImageSourcePVCNamespace  string
+	GuestImageSourcePVCName       string
+	OslatDuration                 time.Duration
+	OslatLatencyThreshold         time.Duration
 }
 
 func New(baseConfig kconfig.Config) (Config, error) {
 	newConfig := Config{
-		PodName:                      baseConfig.PodName,
-		PodUID:                       baseConfig.PodUID,
-		TargetNode:                   baseConfig.Params[TargetNodeParamName],
-		GuestImageSourcePVCNamespace: baseConfig.Params[GuestImageSourcePVCNamespaceParamName],
-		GuestImageSourcePVCName:      baseConfig.Params[GuestImageSourcePVCNameParamName],
-		OslatDuration:                OslatDefaultDuration,
-		OslatLatencyThreshold:        OslatDefaultLatencyThreshold,
+		PodName:                       baseConfig.PodName,
+		PodUID:                        baseConfig.PodUID,
+		TargetNode:                    baseConfig.Params[TargetNodeParamName],
+		VMUnderTestContainerDiskImage: VMUnderTestDefaultContainerDiskImage,
+		GuestImageSourcePVCNamespace:  baseConfig.Params[GuestImageSourcePVCNamespaceParamName],
+		GuestImageSourcePVCName:       baseConfig.Params[GuestImageSourcePVCNameParamName],
+		OslatDuration:                 OslatDefaultDuration,
+		OslatLatencyThreshold:         OslatDefaultLatencyThreshold,
+	}
+
+	if rawVal := baseConfig.Params[VMUnderTestContainerDiskImageParamName]; rawVal != "" {
+		newConfig.VMUnderTestContainerDiskImage = rawVal
 	}
 
 	if rawOslatDuration := baseConfig.Params[OslatDurationParamName]; rawOslatDuration != "" {
