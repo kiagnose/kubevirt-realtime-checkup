@@ -70,7 +70,7 @@ e2e-test:
 		-v $(HOME)/.kube:/root/.kube:Z \
 		--workdir $(PROJECT_WORKING_DIR) \
 		-e TEST_NAMESPACE=$(TEST_NAMESPACE) \
-		-e TEST_IMAGE=$(TEST_IMAGE) \
+		-e TEST_CHECKUP_IMAGE=$(TEST_CHECKUP_IMAGE) \
 		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
 		go test -v ./tests/...
 .PHONY: e2e-test
