@@ -192,12 +192,10 @@ func (cs *clientStub) VMIName() string {
 
 func newTestConfig() config.Config {
 	return config.Config{
-		PodName:                      "",
-		PodUID:                       "",
-		TargetNode:                   testTargetNodeName,
-		GuestImageSourcePVCNamespace: testNamespace,
-		GuestImageSourcePVCName:      testPVCName,
-		OslatDuration:                10 * time.Minute,
-		OslatLatencyThreshold:        45 * time.Microsecond,
+		PodName:               "",
+		PodUID:                "",
+		TargetNode:            testTargetNodeName,
+		OslatDuration:         10 * time.Minute,
+		OslatLatencyThreshold: 45 * time.Microsecond,
 	}
 }

@@ -253,8 +253,6 @@ func newConfigMap() *corev1.ConfigMap {
 	testConfig := map[string]string{
 		"spec.timeout":                                 "15m",
 		"spec.param.targetNode":                        "",
-		"spec.param.guestImageSourcePVCNamespace":      testNamespace,
-		"spec.param.guestImageSourcePVCName":           "centos-8-rt",
 		"spec.param.oslatDuration":                     "10m",
 		"spec.param.oslatLatencyThresholdMicroSeconds": "45",
 	}
