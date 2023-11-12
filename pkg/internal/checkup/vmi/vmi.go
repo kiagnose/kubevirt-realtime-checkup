@@ -214,6 +214,21 @@ func WithPVCVolume(volumeName, pvcName string) Option {
 	}
 }
 
+func WithContainerDisk(volumeName, imageName string) Option {
+	return func(vmi *kvcorev1.VirtualMachineInstance) {
+		newVolume := kvcorev1.Volume{
+			Name: volumeName,
+			VolumeSource: kvcorev1.VolumeSource{
+				ContainerDisk: &kvcorev1.ContainerDiskSource{
+					Image: imageName,
+				},
+			},
+		}
+
+		vmi.Spec.Volumes = append(vmi.Spec.Volumes, newVolume)
+	}
+}
+
 func WithCloudInitNoCloudVolume(name, userData string) Option {
 	return func(vmi *kvcorev1.VirtualMachineInstance) {
 		newVolume := kvcorev1.Volume{
