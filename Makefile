@@ -3,7 +3,7 @@ CONTAINER_ENGINE ?= podman
 REG ?= quay.io
 ORG ?= kiagnose
 
-CHECKUP_IMAGE_NAME ?= quay.io/kiagnose/kubevirt-realtime-checkup
+CHECKUP_IMAGE_NAME ?= $(REG)/$(ORG)/kubevirt-realtime-checkup
 CHECKUP_IMAGE_TAG ?= devel
 
 VM_IMAGE_BUILDER_IMAGE_NAME := kubevirt-realtime-checkup-vm-image-builder
