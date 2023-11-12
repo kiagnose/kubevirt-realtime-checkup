@@ -30,8 +30,6 @@ import (
 const (
 	TargetNodeParamName                    = "targetNode"
 	VMUnderTestContainerDiskImageParamName = "vmUnderTestContainerDiskImage"
-	GuestImageSourcePVCNamespaceParamName  = "guestImageSourcePVCNamespace"
-	GuestImageSourcePVCNameParamName       = "guestImageSourcePVCName"
 	OslatDurationParamName                 = "oslatDuration"
 	OslatLatencyThresholdParamName         = "oslatLatencyThresholdMicroSeconds"
 )
@@ -52,8 +50,6 @@ type Config struct {
 	PodUID                        string
 	TargetNode                    string
 	VMUnderTestContainerDiskImage string
-	GuestImageSourcePVCNamespace  string
-	GuestImageSourcePVCName       string
 	OslatDuration                 time.Duration
 	OslatLatencyThreshold         time.Duration
 }
@@ -64,8 +60,6 @@ func New(baseConfig kconfig.Config) (Config, error) {
 		PodUID:                        baseConfig.PodUID,
 		TargetNode:                    baseConfig.Params[TargetNodeParamName],
 		VMUnderTestContainerDiskImage: VMUnderTestDefaultContainerDiskImage,
-		GuestImageSourcePVCNamespace:  baseConfig.Params[GuestImageSourcePVCNamespaceParamName],
-		GuestImageSourcePVCName:       baseConfig.Params[GuestImageSourcePVCNameParamName],
 		OslatDuration:                 OslatDefaultDuration,
 		OslatLatencyThreshold:         OslatDefaultLatencyThreshold,
 	}
