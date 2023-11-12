@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	namespaceEnvVarName = "TEST_NAMESPACE"
-	imageEnvVarName     = "TEST_CHECKUP_IMAGE"
+	namespaceEnvVarName                     = "TEST_NAMESPACE"
+	imageEnvVarName                         = "TEST_CHECKUP_IMAGE"
+	vmUnderTestContainerDiskImageEnvVarName = "VM_CONTAINER_DISK_IMAGE_URL"
 )
 
 const (
@@ -24,9 +25,10 @@ const (
 )
 
 var (
-	client        *kubernetes.Clientset
-	testNamespace string
-	testImageName string
+	client                        *kubernetes.Clientset
+	testNamespace                 string
+	testImageName                 string
+	vmUnderTestContainerDiskImage string
 )
 
 func TestTests(t *testing.T) {
@@ -54,4 +56,6 @@ var _ = BeforeSuite(func() {
 	if testImageName = os.Getenv(imageEnvVarName); testImageName == "" {
 		testImageName = defaultImageName
 	}
+
+	vmUnderTestContainerDiskImage = os.Getenv(vmUnderTestContainerDiskImageEnvVarName)
 })

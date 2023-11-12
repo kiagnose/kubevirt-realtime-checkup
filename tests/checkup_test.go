@@ -250,18 +250,24 @@ func newRoleBinding(name, serviceAccountName, roleName string) *rbacv1.RoleBindi
 }
 
 func newConfigMap() *corev1.ConfigMap {
+	testConfig := map[string]string{
+		"spec.timeout":                                 "15m",
+		"spec.param.targetNode":                        "",
+		"spec.param.guestImageSourcePVCNamespace":      testNamespace,
+		"spec.param.guestImageSourcePVCName":           "centos-8-rt",
+		"spec.param.oslatDuration":                     "10m",
+		"spec.param.oslatLatencyThresholdMicroSeconds": "45",
+	}
+
+	if vmUnderTestContainerDiskImage != "" {
+		testConfig["spec.param.vmUnderTestContainerDiskImage"] = vmUnderTestContainerDiskImage
+	}
+
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: testConfigMapName,
 		},
-		Data: map[string]string{
-			"spec.timeout":                                 "15m",
-			"spec.param.targetNode":                        "",
-			"spec.param.guestImageSourcePVCNamespace":      testNamespace,
-			"spec.param.guestImageSourcePVCName":           "centos-8-rt",
-			"spec.param.oslatDuration":                     "10m",
-			"spec.param.oslatLatencyThresholdMicroSeconds": "45",
-		},
+		Data: testConfig,
 	}
 }
 
