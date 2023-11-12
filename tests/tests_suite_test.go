@@ -15,7 +15,7 @@ import (
 
 const (
 	namespaceEnvVarName = "TEST_NAMESPACE"
-	imageEnvVarName     = "TEST_IMAGE"
+	imageEnvVarName     = "TEST_CHECKUP_IMAGE"
 )
 
 const (
