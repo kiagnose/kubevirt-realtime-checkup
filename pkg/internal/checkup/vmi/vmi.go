@@ -153,23 +153,12 @@ func WithVirtIODisk(name string) Option {
 	}
 }
 
-func WithHugePages() Option {
+func WithMemory(hugePageSize, guestMemory string) Option {
 	return func(vmi *kvcorev1.VirtualMachineInstance) {
+		guestMemoryQuantity := resource.MustParse(guestMemory)
 		vmi.Spec.Domain.Memory = &kvcorev1.Memory{
-			Hugepages: &kvcorev1.Hugepages{PageSize: "1Gi"},
-		}
-	}
-}
-
-func WithResources(memory string) Option {
-	return func(vmi *kvcorev1.VirtualMachineInstance) {
-		vmi.Spec.Domain.Resources = kvcorev1.ResourceRequirements{
-			Requests: corev1.ResourceList{
-				corev1.ResourceMemory: resource.MustParse(memory),
-			},
-			Limits: corev1.ResourceList{
-				corev1.ResourceMemory: resource.MustParse(memory),
-			},
+			Hugepages: &kvcorev1.Hugepages{PageSize: hugePageSize},
+			Guest:     &guestMemoryQuantity,
 		}
 	}
 }
