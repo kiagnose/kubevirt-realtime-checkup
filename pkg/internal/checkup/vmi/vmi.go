@@ -113,17 +113,13 @@ func WithRealtimeCPU(socketsCount, coresCount, threadsCount uint32) Option {
 			Sockets:               socketsCount,
 			Cores:                 coresCount,
 			Threads:               threadsCount,
-			Model:                 "host-passthrough",
+			Model:                 kvcorev1.CPUModeHostPassthrough,
 			DedicatedCPUPlacement: true,
 			IsolateEmulatorThread: true,
-
-			Features: []kvcorev1.CPUFeature{
-				{Name: "tsc-deadline", Policy: "require"},
-			},
 			NUMA: &kvcorev1.NUMA{
 				GuestMappingPassthrough: &kvcorev1.NUMAGuestMappingPassthrough{},
 			},
-			Realtime: &kvcorev1.Realtime{Mask: "1-2"},
+			Realtime: &kvcorev1.Realtime{},
 		}
 	}
 }
