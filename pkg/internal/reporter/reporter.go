@@ -30,8 +30,8 @@ import (
 )
 
 const (
-	NodeKey            = "node"
-	OslatMaxLatencyKey = "oslatMaxLatencyMicroSeconds"
+	VMUnderTestActualNodeNameKey = "vmUnderTestActualNodeName"
+	OslatMaxLatencyKey           = "oslatMaxLatencyMicroSeconds"
 )
 
 type Reporter struct {
@@ -62,8 +62,8 @@ func formatResults(checkupStatus status.Status) map[string]string {
 	}
 
 	formattedResults := map[string]string{
-		NodeKey:            checkupStatus.Results.Node,
-		OslatMaxLatencyKey: fmt.Sprintf("%d", checkupStatus.Results.OslatMaxLatency.Microseconds()),
+		VMUnderTestActualNodeNameKey: checkupStatus.Results.VMUnderTestActualNodeName,
+		OslatMaxLatencyKey:           fmt.Sprintf("%d", checkupStatus.Results.OslatMaxLatency.Microseconds()),
 	}
 
 	return formattedResults

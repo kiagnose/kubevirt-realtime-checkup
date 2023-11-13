@@ -26,8 +26,8 @@ import (
 )
 
 type Results struct {
-	Node            string
-	OslatMaxLatency time.Duration
+	VMUnderTestActualNodeName string
+	OslatMaxLatency           time.Duration
 }
 
 type Status struct {

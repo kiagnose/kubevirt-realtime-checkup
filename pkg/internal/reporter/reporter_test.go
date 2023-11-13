@@ -52,7 +52,7 @@ func TestReportShouldSucceed(t *testing.T) {
 
 func TestReportShouldSuccessfullyReportResults(t *testing.T) {
 	const (
-		expectedNodeName = "rt-node"
+		expectedVMUnderTestActualNodeName = "rt-node"
 	)
 
 	const (
@@ -71,8 +71,8 @@ func TestReportShouldSuccessfullyReportResults(t *testing.T) {
 		checkupStatus.FailureReason = []string{}
 		checkupStatus.CompletionTimestamp = time.Now()
 		checkupStatus.Results = status.Results{
-			Node:            expectedNodeName,
-			OslatMaxLatency: 12 * time.Microsecond,
+			VMUnderTestActualNodeName: expectedVMUnderTestActualNodeName,
+			OslatMaxLatency:           12 * time.Microsecond,
 		}
 
 		assert.NoError(t, testReporter.Report(checkupStatus))
@@ -82,7 +82,7 @@ func TestReportShouldSuccessfullyReportResults(t *testing.T) {
 			"status.failureReason":                      "",
 			"status.startTimestamp":                     timestamp(checkupStatus.StartTimestamp),
 			"status.completionTimestamp":                timestamp(checkupStatus.CompletionTimestamp),
-			"status.result.node":                        checkupStatus.Results.Node,
+			"status.result.vmUnderTestActualNodeName":   checkupStatus.Results.VMUnderTestActualNodeName,
 			"status.result.oslatMaxLatencyMicroSeconds": fmt.Sprintf("%d", checkupStatus.Results.OslatMaxLatency.Microseconds()),
 		}
 
