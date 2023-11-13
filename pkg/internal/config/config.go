@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	TargetNodeParamName                    = "targetNode"
+	VMUnderTestTargetNodeNameParamName     = "vmUnderTestTargetNodeName"
 	VMUnderTestContainerDiskImageParamName = "vmUnderTestContainerDiskImage"
 	OslatDurationParamName                 = "oslatDuration"
 	OslatLatencyThresholdParamName         = "oslatLatencyThresholdMicroSeconds"
@@ -48,7 +48,7 @@ var (
 type Config struct {
 	PodName                       string
 	PodUID                        string
-	TargetNode                    string
+	VMUnderTestTargetNodeName     string
 	VMUnderTestContainerDiskImage string
 	OslatDuration                 time.Duration
 	OslatLatencyThreshold         time.Duration
@@ -58,7 +58,7 @@ func New(baseConfig kconfig.Config) (Config, error) {
 	newConfig := Config{
 		PodName:                       baseConfig.PodName,
 		PodUID:                        baseConfig.PodUID,
-		TargetNode:                    baseConfig.Params[TargetNodeParamName],
+		VMUnderTestTargetNodeName:     baseConfig.Params[VMUnderTestTargetNodeNameParamName],
 		VMUnderTestContainerDiskImage: VMUnderTestDefaultContainerDiskImage,
 		OslatDuration:                 OslatDefaultDuration,
 		OslatLatencyThreshold:         OslatDefaultLatencyThreshold,

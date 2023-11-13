@@ -188,7 +188,7 @@ user: user`
 		vmi.WithHugePages(),
 		vmi.WithResources("3", "8Gi"),
 		vmi.WithZeroTerminationGracePeriodSeconds(),
-		vmi.WithNodeSelector(checkupConfig.TargetNode),
+		vmi.WithNodeSelector(checkupConfig.VMUnderTestTargetNodeName),
 		vmi.WithContainerDisk(rootDiskName, checkupConfig.VMUnderTestContainerDiskImage),
 		vmi.WithVirtIODisk(rootDiskName),
 		vmi.WithCloudInitNoCloudVolume(cloudInitDiskName, userData),

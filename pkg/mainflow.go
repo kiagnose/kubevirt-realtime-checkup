@@ -60,7 +60,7 @@ func Run(rawEnv map[string]string, namespace string) error {
 
 func printConfig(checkupConfig config.Config) {
 	log.Println("Using the following config:")
-	log.Printf("\t%q: %q", config.TargetNodeParamName, checkupConfig.TargetNode)
+	log.Printf("\t%q: %q", config.VMUnderTestTargetNodeNameParamName, checkupConfig.VMUnderTestTargetNodeName)
 	log.Printf("\t%q: %q", config.VMUnderTestContainerDiskImageParamName, checkupConfig.VMUnderTestContainerDiskImage)
 	log.Printf("\t%q: %q", config.OslatDurationParamName, checkupConfig.OslatDuration.String())
 	log.Printf("\t%q: %q", config.OslatLatencyThresholdParamName, checkupConfig.OslatLatencyThreshold.String())
