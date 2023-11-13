@@ -107,9 +107,12 @@ func WithoutCRIOIRQLoadBalancing() Option {
 	}
 }
 
-func WithRealtimeCPU() Option {
+func WithRealtimeCPU(socketsCount, coresCount, threadsCount uint32) Option {
 	return func(vmi *kvcorev1.VirtualMachineInstance) {
 		vmi.Spec.Domain.CPU = &kvcorev1.CPU{
+			Sockets:               socketsCount,
+			Cores:                 coresCount,
+			Threads:               threadsCount,
 			Model:                 "host-passthrough",
 			DedicatedCPUPlacement: true,
 			IsolateEmulatorThread: true,
@@ -162,15 +165,13 @@ func WithHugePages() Option {
 	}
 }
 
-func WithResources(cpu, memory string) Option {
+func WithResources(memory string) Option {
 	return func(vmi *kvcorev1.VirtualMachineInstance) {
 		vmi.Spec.Domain.Resources = kvcorev1.ResourceRequirements{
 			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse(cpu),
 				corev1.ResourceMemory: resource.MustParse(memory),
 			},
 			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse(cpu),
 				corev1.ResourceMemory: resource.MustParse(memory),
 			},
 		}

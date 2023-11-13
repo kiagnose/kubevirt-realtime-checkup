@@ -168,6 +168,9 @@ func (c *Checkup) waitForVMIDeletion(ctx context.Context) error {
 
 func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
 	const (
+		CPUSocketsCount   = 1
+		CPUCoresCount     = 3
+		CPUTreadsCount    = 1
 		rootDiskName      = "rootdisk"
 		cloudInitDiskName = "cloudinitdisk"
 		userData          = `#cloud-config
@@ -181,12 +184,12 @@ user: user`
 		vmi.WithoutCRIOCPULoadBalancing(),
 		vmi.WithoutCRIOCPUQuota(),
 		vmi.WithoutCRIOIRQLoadBalancing(),
-		vmi.WithRealtimeCPU(),
+		vmi.WithRealtimeCPU(CPUSocketsCount, CPUCoresCount, CPUTreadsCount),
 		vmi.WithoutAutoAttachGraphicsDevice(),
 		vmi.WithoutAutoAttachMemBalloon(),
 		vmi.WithAutoAttachSerialConsole(),
 		vmi.WithHugePages(),
-		vmi.WithResources("3", "8Gi"),
+		vmi.WithResources("8Gi"),
 		vmi.WithZeroTerminationGracePeriodSeconds(),
 		vmi.WithNodeSelector(checkupConfig.VMUnderTestTargetNodeName),
 		vmi.WithContainerDisk(rootDiskName, checkupConfig.VMUnderTestContainerDiskImage),
