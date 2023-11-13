@@ -171,6 +171,8 @@ func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstanc
 		CPUSocketsCount   = 1
 		CPUCoresCount     = 3
 		CPUTreadsCount    = 1
+		hugePageSize      = "1Gi"
+		guestMemory       = "4Gi"
 		rootDiskName      = "rootdisk"
 		cloudInitDiskName = "cloudinitdisk"
 		userData          = `#cloud-config
@@ -185,11 +187,10 @@ user: user`
 		vmi.WithoutCRIOCPUQuota(),
 		vmi.WithoutCRIOIRQLoadBalancing(),
 		vmi.WithRealtimeCPU(CPUSocketsCount, CPUCoresCount, CPUTreadsCount),
+		vmi.WithMemory(hugePageSize, guestMemory),
 		vmi.WithoutAutoAttachGraphicsDevice(),
 		vmi.WithoutAutoAttachMemBalloon(),
 		vmi.WithAutoAttachSerialConsole(),
-		vmi.WithHugePages(),
-		vmi.WithResources("8Gi"),
 		vmi.WithZeroTerminationGracePeriodSeconds(),
 		vmi.WithNodeSelector(checkupConfig.VMUnderTestTargetNodeName),
 		vmi.WithContainerDisk(rootDiskName, checkupConfig.VMUnderTestContainerDiskImage),
