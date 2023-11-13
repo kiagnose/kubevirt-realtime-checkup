@@ -33,7 +33,7 @@ import (
 const (
 	testPodName                           = "my-pod"
 	testPodUID                            = "0123456789-0123456789"
-	testTargetNodeName                    = "my-rt-node"
+	testVMUnderTestTargetNodeName         = "my-rt-node"
 	testVMContainerDiskImage              = "quay.io/myorg/kubevirt-realtime-checkup-vm:latest"
 	testOslatDuration                     = "1h"
 	testOslatLatencyThresholdMicroSeconds = "50"
@@ -52,7 +52,7 @@ func TestNewShouldApplyDefaultsWhenOptionalFieldsAreMissing(t *testing.T) {
 	expectedConfig := config.Config{
 		PodName:                       testPodName,
 		PodUID:                        testPodUID,
-		TargetNode:                    "",
+		VMUnderTestTargetNodeName:     "",
 		VMUnderTestContainerDiskImage: config.VMUnderTestDefaultContainerDiskImage,
 		OslatDuration:                 config.OslatDefaultDuration,
 		OslatLatencyThreshold:         config.OslatDefaultLatencyThreshold,
@@ -65,7 +65,7 @@ func TestNewShouldApplyUserConfig(t *testing.T) {
 		PodName: testPodName,
 		PodUID:  testPodUID,
 		Params: map[string]string{
-			config.TargetNodeParamName:                    testTargetNodeName,
+			config.VMUnderTestTargetNodeNameParamName:     testVMUnderTestTargetNodeName,
 			config.VMUnderTestContainerDiskImageParamName: testVMContainerDiskImage,
 			config.OslatDurationParamName:                 testOslatDuration,
 			config.OslatLatencyThresholdParamName:         testOslatLatencyThresholdMicroSeconds,
@@ -78,7 +78,7 @@ func TestNewShouldApplyUserConfig(t *testing.T) {
 	expectedConfig := config.Config{
 		PodName:                       testPodName,
 		PodUID:                        testPodUID,
-		TargetNode:                    testTargetNodeName,
+		VMUnderTestTargetNodeName:     testVMUnderTestTargetNodeName,
 		VMUnderTestContainerDiskImage: testVMContainerDiskImage,
 		OslatDuration:                 time.Hour,
 		OslatLatencyThreshold:         50 * time.Microsecond,
@@ -97,18 +97,18 @@ func TestNewShouldFailWhen(t *testing.T) {
 		{
 			description: "oslatDuration is invalid",
 			userParameters: map[string]string{
-				config.TargetNodeParamName:            testTargetNodeName,
-				config.OslatDurationParamName:         "wrongValue",
-				config.OslatLatencyThresholdParamName: testOslatLatencyThresholdMicroSeconds,
+				config.VMUnderTestTargetNodeNameParamName: testVMUnderTestTargetNodeName,
+				config.OslatDurationParamName:             "wrongValue",
+				config.OslatLatencyThresholdParamName:     testOslatLatencyThresholdMicroSeconds,
 			},
 			expectedError: config.ErrInvalidOslatDuration,
 		},
 		{
 			description: "oslatLatencyThresholdMicroSeconds is invalid",
 			userParameters: map[string]string{
-				config.TargetNodeParamName:            testTargetNodeName,
-				config.OslatDurationParamName:         testOslatDuration,
-				config.OslatLatencyThresholdParamName: "wrongValue",
+				config.VMUnderTestTargetNodeNameParamName: testVMUnderTestTargetNodeName,
+				config.OslatDurationParamName:             testOslatDuration,
+				config.OslatLatencyThresholdParamName:     "wrongValue",
 			},
 			expectedError: config.ErrInvalidOslatLatencyThreshold,
 		},
