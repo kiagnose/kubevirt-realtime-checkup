@@ -25,3 +25,6 @@ systemctl disable irqbalance
 
 dnf --enablerepo=rt install -y tuned-profiles-realtime
 dnf --enablerepo=nfv install -y tuned-profiles-nfv-guest
+
+swapoff -a
+sed -i '/swap/s/^/#/' /etc/fstab
