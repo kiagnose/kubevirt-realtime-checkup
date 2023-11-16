@@ -21,3 +21,4 @@ set -e
 
 systemctl disable NetworkManager-wait-online
 systemctl disable sshd
+systemctl disable irqbalance
