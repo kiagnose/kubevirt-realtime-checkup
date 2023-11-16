@@ -17,13 +17,10 @@
 # Copyright 2023 Red Hat, Inc.
 #
 
-export LIBGUESTFS_BACKEND=direct
+set -e
 
-virt-builder centosstream-8 \
-  --format qcow2 \
-  --root-password password:redhat \
-  --install cloud-init,kernel-rt,tuned,rt-tests \
-  --run /root/scripts/customize-vm \
-  --firstboot /root/scripts/first-boot \
-  --selinux-relabel \
-  --output /output/kubevirt-realtime-checkup-vm.qcow2
+echo isolated_cores=1-2 >> /etc/tuned/realtime-virtual-guest-variables.conf
+echo isolate_managed_irq=Y >> /etc/tuned/realtime-virtual-guest-variables.conf
+tuned-adm profile realtime-virtual-guest
+
+reboot
