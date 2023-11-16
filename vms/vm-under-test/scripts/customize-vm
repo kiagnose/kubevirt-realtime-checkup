@@ -22,3 +22,6 @@ set -e
 systemctl disable NetworkManager-wait-online
 systemctl disable sshd
 systemctl disable irqbalance
+
+dnf --enablerepo=rt install -y tuned-profiles-realtime
+dnf --enablerepo=nfv install -y tuned-profiles-nfv-guest
