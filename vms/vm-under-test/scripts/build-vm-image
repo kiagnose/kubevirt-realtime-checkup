@@ -22,7 +22,7 @@ export LIBGUESTFS_BACKEND=direct
 virt-builder centosstream-8 \
   --format qcow2 \
   --root-password password:redhat \
-  --install cloud-init \
+  --install cloud-init,kernel-rt,tuned,rt-tests \
   --run /root/scripts/customize-vm \
   --selinux-relabel \
   --output /output/kubevirt-realtime-checkup-vm.qcow2
