@@ -16,7 +16,7 @@ import (
 const (
 	namespaceEnvVarName                     = "TEST_NAMESPACE"
 	imageEnvVarName                         = "TEST_CHECKUP_IMAGE"
-	vmUnderTestContainerDiskImageEnvVarName = "VM_CONTAINER_DISK_IMAGE_URL"
+	vmUnderTestContainerDiskImageEnvVarName = "VM_UNDER_TEST_CONTAINER_DISK_IMAGE"
 )
 
 const (
