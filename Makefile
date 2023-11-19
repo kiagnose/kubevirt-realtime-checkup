@@ -20,6 +20,7 @@ GO_IMAGE_TAG := 1.19.4-bullseye
 
 LINTER_IMAGE_NAME := docker.io/golangci/golangci-lint
 LINTER_IMAGE_TAG := v1.50.1
+KUBECONFIG ?= $(HOME)/.kube/config
 
 PROJECT_WORKING_DIR := /go/src/github.com/kiagnose/kubevirt-realtime-checkup
 
@@ -67,8 +68,9 @@ e2e-test:
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
 		-v $(PWD)/_go-cache:/root/.cache/go-build:Z \
-		-v $(HOME)/.kube:/root/.kube:Z \
+		-v $(shell dirname $(KUBECONFIG)):/root/.kube:Z,ro \
 		--workdir $(PROJECT_WORKING_DIR) \
+		-e KUBECONFIG=/root/.kube/$(shell basename $(KUBECONFIG)) \
 		-e TEST_NAMESPACE=$(TEST_NAMESPACE) \
 		-e TEST_CHECKUP_IMAGE=$(TEST_CHECKUP_IMAGE) \
 		-e VM_UNDER_TEST_CONTAINER_DISK_IMAGE=$(VM_UNDER_TEST_CONTAINER_DISK_IMAGE) \
