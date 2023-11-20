@@ -17,5 +17,7 @@
 # Copyright 2023 Red Hat, Inc.
 #
 
+set -e
+
 systemctl disable NetworkManager-wait-online
 systemctl disable sshd
