@@ -47,7 +47,7 @@ const (
 
 func TestCheckupShouldSucceed(t *testing.T) {
 	testClient := newClientStub()
-	testCheckup := checkup.New(testClient, testNamespace, newTestConfig())
+	testCheckup := checkup.New(testClient, testNamespace, newTestConfig(), executorStub{})
 
 	assert.NoError(t, testCheckup.Setup(context.Background()))
 
@@ -72,7 +72,7 @@ func TestSetupShouldFail(t *testing.T) {
 
 		testClient := newClientStub()
 		testClient.vmiCreationFailure = expectedVMICreationFailure
-		testCheckup := checkup.New(testClient, testNamespace, newTestConfig())
+		testCheckup := checkup.New(testClient, testNamespace, newTestConfig(), executorStub{})
 
 		assert.ErrorContains(t, testCheckup.Setup(context.Background()), expectedVMICreationFailure.Error())
 	})
@@ -83,7 +83,7 @@ func TestSetupShouldFail(t *testing.T) {
 		testClient := newClientStub()
 		testConfig := newTestConfig()
 		testClient.vmiReadFailure = expectedVMIReadFailure
-		testCheckup := checkup.New(testClient, testNamespace, testConfig)
+		testCheckup := checkup.New(testClient, testNamespace, testConfig, executorStub{})
 
 		assert.ErrorContains(t, testCheckup.Setup(context.Background()), expectedVMIReadFailure.Error())
 	})
@@ -106,7 +106,7 @@ func TestTeardownShouldFailWhen(t *testing.T) {
 
 		testClient := newClientStub()
 		testClient.vmiDeletionFailure = expectedVMIDeletionFailure
-		testCheckup := checkup.New(testClient, testNamespace, newTestConfig())
+		testCheckup := checkup.New(testClient, testNamespace, newTestConfig(), executorStub{})
 
 		assert.NoError(t, testCheckup.Setup(context.Background()))
 		assert.NoError(t, testCheckup.Run(context.Background()))
@@ -118,7 +118,7 @@ func TestTeardownShouldFailWhen(t *testing.T) {
 		expectedReadFailure := errors.New("failed to read VMI")
 
 		testClient := newClientStub()
-		testCheckup := checkup.New(testClient, testNamespace, newTestConfig())
+		testCheckup := checkup.New(testClient, testNamespace, newTestConfig(), executorStub{})
 
 		assert.NoError(t, testCheckup.Setup(context.Background()))
 		assert.NoError(t, testCheckup.Run(context.Background()))
@@ -199,6 +199,43 @@ func (cs *clientStub) VMIName() string {
 	}
 
 	return ""
+}
+
+func TestRunFailure(t *testing.T) {
+	expectedExecutionFailure := errors.New("failed to execute realtime checkup")
+
+	testClient := newClientStub()
+	testConfig := newTestConfig()
+	testCheckup := checkup.New(testClient, testNamespace, testConfig, executorStub{executeErr: expectedExecutionFailure})
+
+	assert.NoError(t, testCheckup.Setup(context.Background()))
+
+	vmiName := testClient.VMIName()
+	assert.NotEmpty(t, vmiName)
+
+	assert.Error(t, expectedExecutionFailure, testCheckup.Run(context.Background()))
+
+	assert.NoError(t, testCheckup.Teardown(context.Background()))
+
+	_, err := testClient.GetVirtualMachineInstance(context.Background(), testNamespace, vmiName)
+	assert.ErrorContains(t, err, "not found")
+
+	actualResults := testCheckup.Results()
+	expectedResults := status.Results{}
+
+	assert.Equal(t, expectedResults, actualResults)
+}
+
+type executorStub struct {
+	executeErr error
+}
+
+func (es executorStub) Execute(_ context.Context, vmiName string) (status.Results, error) {
+	if es.executeErr != nil {
+		return status.Results{}, es.executeErr
+	}
+
+	return status.Results{}, nil
 }
 
 func newTestConfig() config.Config {

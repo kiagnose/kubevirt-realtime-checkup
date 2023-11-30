@@ -46,20 +46,26 @@ type kubeVirtVMIClient interface {
 	DeleteVirtualMachineInstance(ctx context.Context, namespace, name string) error
 }
 
+type testExecutor interface {
+	Execute(ctx context.Context, vmiName string) (status.Results, error)
+}
+
 type Checkup struct {
 	client    kubeVirtVMIClient
 	namespace string
 	vmi       *kvcorev1.VirtualMachineInstance
 	results   status.Results
+	executor  testExecutor
 }
 
 const VMINamePrefix = "rt-vmi"
 
-func New(client kubeVirtVMIClient, namespace string, checkupConfig config.Config) *Checkup {
+func New(client kubeVirtVMIClient, namespace string, checkupConfig config.Config, executor testExecutor) *Checkup {
 	return &Checkup{
 		client:    client,
 		namespace: namespace,
 		vmi:       newRealtimeVMI(checkupConfig),
+		executor:  executor,
 	}
 }
 
@@ -82,6 +88,13 @@ func (c *Checkup) Setup(ctx context.Context) error {
 }
 
 func (c *Checkup) Run(ctx context.Context) error {
+	var err error
+
+	c.results, err = c.executor.Execute(ctx, c.vmi.Name)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
