@@ -21,10 +21,13 @@ package executor
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"time"
 
 	"kubevirt.io/client-go/kubecli"
 
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/checkup/executor/console"
 	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/config"
 	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/status"
 )
@@ -50,5 +53,11 @@ func New(client vmiSerialConsoleClient, namespace string) Executor {
 }
 
 func (e Executor) Execute(ctx context.Context, vmiUnderTestName string) (status.Results, error) {
+	log.Printf("Login to VMI under test...")
+	vmiUnderTestConsoleExpecter := console.NewExpecter(e.vmiSerialClient, e.namespace, vmiUnderTestName)
+	if err := vmiUnderTestConsoleExpecter.LoginToCentOS(e.vmiUsername, e.vmiPassword); err != nil {
+		return status.Results{}, fmt.Errorf("failed to login to VMI \"%s/%s\": %w", e.namespace, vmiUnderTestName, err)
+	}
+
 	return status.Results{}, nil
 }
