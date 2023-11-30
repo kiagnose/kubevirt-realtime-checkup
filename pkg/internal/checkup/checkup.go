@@ -50,6 +50,7 @@ type Checkup struct {
 	client    kubeVirtVMIClient
 	namespace string
 	vmi       *kvcorev1.VirtualMachineInstance
+	results   status.Results
 }
 
 const VMINamePrefix = "rt-vmi"
@@ -99,7 +100,7 @@ func (c *Checkup) Teardown(ctx context.Context) error {
 }
 
 func (c *Checkup) Results() status.Results {
-	return status.Results{}
+	return c.results
 }
 
 func (c *Checkup) waitForVMIToBoot(ctx context.Context) error {
