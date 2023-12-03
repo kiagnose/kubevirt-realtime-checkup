@@ -21,6 +21,7 @@ package tests
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -77,7 +78,21 @@ var _ = Describe("Checkup execution", func() {
 	})
 
 	It("should complete successfully", func() {
-		Eventually(getJobConditions, 15*time.Minute, 5*time.Second).Should(
+		Eventually(func() []batchv1.JobCondition {
+			jobConditions, err := getJobConditions()
+			Expect(err).NotTo(HaveOccurred())
+
+			for _, jobCondition := range jobConditions {
+				if jobCondition.Type == batchv1.JobFailed && jobCondition.Status == corev1.ConditionTrue {
+					configMap, err := client.CoreV1().ConfigMaps(testNamespace).Get(context.Background(), testConfigMapName, metav1.GetOptions{})
+					Expect(err).NotTo(HaveOccurred())
+
+					Fail(fmt.Sprintf("checkup failed: %+v", prettifyData(configMap.Data)))
+				}
+			}
+
+			return jobConditions
+		}, 15*time.Minute, 5*time.Second).Should(
 			ContainElement(MatchFields(IgnoreExtras, Fields{
 				"Type":   Equal(batchv1.JobComplete),
 				"Status": Equal(corev1.ConditionTrue),
@@ -91,6 +106,12 @@ var _ = Describe("Checkup execution", func() {
 		Expect(configMap.Data["status.failureReason"]).To(BeEmpty(), fmt.Sprintf("should be empty %+v", configMap.Data))
 	})
 })
+
+func prettifyData(data map[string]string) string {
+	dataPrettyJSON, err := json.MarshalIndent(data, "", "\t")
+	Expect(err).NotTo(HaveOccurred())
+	return string(dataPrettyJSON)
+}
 
 func setupCheckupPermissions() {
 	var (
@@ -321,11 +342,11 @@ func pointer[T any](v T) *T {
 	return &v
 }
 
-func getJobConditions() []batchv1.JobCondition {
+func getJobConditions() ([]batchv1.JobCondition, error) {
 	checkupJob, err := client.BatchV1().Jobs(testNamespace).Get(context.Background(), testCheckupJobName, metav1.GetOptions{})
 	if err != nil {
-		return []batchv1.JobCondition{}
+		return nil, err
 	}
 
-	return checkupJob.Status.Conditions
+	return checkupJob.Status.Conditions, nil
 }
