@@ -35,6 +35,9 @@ const (
 )
 
 const (
+	VMIUsername = "cloud-user"
+	VMIPassword = "0tli-pxem-xknu" // #nosec
+
 	VMUnderTestDefaultContainerDiskImage = "quay.io/kiagnose/kubevirt-realtime-checkup-vm:main"
 	OslatDefaultDuration                 = 5 * time.Minute
 	OslatDefaultLatencyThreshold         = 40 * time.Microsecond
