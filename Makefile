@@ -24,6 +24,9 @@ KUBECONFIG ?= $(HOME)/.kube/config
 
 PROJECT_WORKING_DIR := /go/src/github.com/kiagnose/kubevirt-realtime-checkup
 
+E2E_TEST_TIMEOUT ?= 1h
+E2E_TEST_ARGS ?= -test.v -test.timeout=$(E2E_TEST_TIMEOUT) -ginkgo.v -ginkgo.timeout=$(E2E_TEST_TIMEOUT) $(E2E_TEST_EXTRA_ARGS)
+
 all: lint unit-test build
 .PHONY: all
 
@@ -75,7 +78,7 @@ e2e-test:
 		-e TEST_CHECKUP_IMAGE=$(TEST_CHECKUP_IMAGE) \
 		-e VM_UNDER_TEST_CONTAINER_DISK_IMAGE=$(VM_UNDER_TEST_CONTAINER_DISK_IMAGE) \
 		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
-		go test -v ./tests/...
+		go test -v ./tests/... $(E2E_TEST_ARGS)
 .PHONY: e2e-test
 
 lint:
