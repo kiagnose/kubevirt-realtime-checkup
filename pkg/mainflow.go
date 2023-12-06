@@ -51,7 +51,7 @@ func Run(rawEnv map[string]string, namespace string) error {
 
 	printConfig(cfg)
 
-	realtimeCheckupExecutor := executor.New(c, namespace)
+	realtimeCheckupExecutor := executor.New(c, namespace, cfg)
 	l := launcher.New(
 		checkup.New(c, namespace, cfg, realtimeCheckupExecutor),
 		reporter.New(c, baseConfig.ConfigMapNamespace, baseConfig.ConfigMapName),

@@ -41,14 +41,16 @@ type Executor struct {
 	namespace       string
 	vmiUsername     string
 	vmiPassword     string
+	OslatDuration   time.Duration
 }
 
-func New(client vmiSerialConsoleClient, namespace string) Executor {
+func New(client vmiSerialConsoleClient, namespace string, cfg config.Config) Executor {
 	return Executor{
 		vmiSerialClient: client,
 		namespace:       namespace,
 		vmiUsername:     config.VMIUsername,
 		vmiPassword:     config.VMIPassword,
+		OslatDuration:   cfg.OslatDuration,
 	}
 }
 
