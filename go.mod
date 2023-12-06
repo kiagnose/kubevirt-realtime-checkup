@@ -1,6 +1,6 @@
 module github.com/kiagnose/kubevirt-realtime-checkup
 
-go 1.19
+go 1.20
 
 require (
 	github.com/kiagnose/kiagnose v0.2.1-0.20221208132946-95d8c7995fab
