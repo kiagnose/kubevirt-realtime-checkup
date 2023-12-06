@@ -28,6 +28,7 @@ import (
 	"kubevirt.io/client-go/kubecli"
 
 	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/checkup/executor/console"
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/checkup/executor/oslat"
 	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/config"
 	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/status"
 )
@@ -61,5 +62,15 @@ func (e Executor) Execute(ctx context.Context, vmiUnderTestName string) (status.
 		return status.Results{}, fmt.Errorf("failed to login to VMI \"%s/%s\": %w", e.namespace, vmiUnderTestName, err)
 	}
 
-	return status.Results{}, nil
+	oslatClient := oslat.NewClient(vmiUnderTestConsoleExpecter, e.OslatDuration)
+	log.Printf("Running Oslat test on VMI under test for %s...", e.OslatDuration.String())
+	maxLatency, err := oslatClient.Run(ctx)
+	if err != nil {
+		return status.Results{}, fmt.Errorf("failed to run Oslat on VMI \"%s/%s\": %w", e.namespace, vmiUnderTestName, err)
+	}
+	log.Printf("Max Oslat Latency measured: %s", maxLatency.String())
+
+	return status.Results{
+		OslatMaxLatency: maxLatency,
+	}, nil
 }
