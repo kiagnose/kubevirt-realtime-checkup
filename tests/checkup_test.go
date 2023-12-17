@@ -104,6 +104,8 @@ var _ = Describe("Checkup execution", func() {
 		Expect(configMap.Data).NotTo(BeNil())
 		Expect(configMap.Data["status.succeeded"]).To(Equal("true"), fmt.Sprintf("should succeed %+v", configMap.Data))
 		Expect(configMap.Data["status.failureReason"]).To(BeEmpty(), fmt.Sprintf("should be empty %+v", configMap.Data))
+		Expect(configMap.Data["status.result.vmUnderTestActualNodeName"]).
+			ToNot(BeEmpty(), fmt.Sprintf("vmUnderTestActualNodeName should not be empty %+v", configMap.Data))
 	})
 })
 
