@@ -321,6 +321,14 @@ func newCheckupJob() *batchv1.Job {
 									Name:  "CONFIGMAP_NAME",
 									Value: testConfigMapName,
 								},
+								{
+									Name: "POD_UID",
+									ValueFrom: &corev1.EnvVarSource{
+										FieldRef: &corev1.ObjectFieldSelector{
+											FieldPath: "metadata.uid",
+										},
+									},
+								},
 							},
 						},
 					},
