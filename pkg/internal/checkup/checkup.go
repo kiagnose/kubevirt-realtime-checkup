@@ -94,6 +94,7 @@ func (c *Checkup) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	c.results.VMUnderTestActualNodeName = c.vmi.Status.NodeName
 
 	return nil
 }
