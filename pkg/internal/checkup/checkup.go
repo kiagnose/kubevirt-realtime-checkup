@@ -194,6 +194,7 @@ func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstanc
 	)
 
 	return vmi.New(randomizeName(VMINamePrefix),
+		vmi.WithOwnerReference(checkupConfig.PodName, checkupConfig.PodUID),
 		vmi.WithoutCRIOCPULoadBalancing(),
 		vmi.WithoutCRIOCPUQuota(),
 		vmi.WithoutCRIOIRQLoadBalancing(),
