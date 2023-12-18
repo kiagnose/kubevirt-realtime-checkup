@@ -36,11 +36,11 @@ import (
 )
 
 const (
-	testServiceAccountName              = "rt-checkup-sa"
+	testServiceAccountName              = "realtime-checkup-sa"
 	testKiagnoseConfigMapAccessRoleName = "kiagnose-configmap-access"
-	testKubeVirtRTCheckerRoleName       = "kubevirt-rt-checker"
-	testConfigMapName                   = "rt-checkup-config"
-	testCheckupJobName                  = "rt-checkup"
+	testKubeVirtRTCheckerRoleName       = "kubevirt-realtime-checker"
+	testConfigMapName                   = "realtime-checkup-config"
+	testCheckupJobName                  = "realtime-checkup"
 )
 
 var _ = Describe("Checkup execution", func() {
@@ -310,7 +310,7 @@ func newCheckupJob() *batchv1.Job {
 					RestartPolicy:      corev1.RestartPolicyNever,
 					Containers: []corev1.Container{
 						{
-							Name:            "rt-checkup",
+							Name:            "realtime-checkup",
 							Image:           testImageName,
 							ImagePullPolicy: corev1.PullAlways,
 							SecurityContext: newSecurityContext(),
