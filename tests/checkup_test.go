@@ -38,7 +38,7 @@ import (
 const (
 	testServiceAccountName              = "realtime-checkup-sa"
 	testKiagnoseConfigMapAccessRoleName = "kiagnose-configmap-access"
-	testKubeVirtRTCheckerRoleName       = "kubevirt-realtime-checker"
+	testKubeVirtRealTimeCheckerRoleName = "kubevirt-realtime-checker"
 	testConfigMapName                   = "realtime-checkup-config"
 	testCheckupJobName                  = "realtime-checkup"
 )
@@ -121,8 +121,8 @@ func setupCheckupPermissions() {
 		checkupServiceAccount              *corev1.ServiceAccount
 		kiagnoseConfigMapAccessRole        *rbacv1.Role
 		kiagnoseConfigMapAccessRoleBinding *rbacv1.RoleBinding
-		kubeVirtRTCheckerRole              *rbacv1.Role
-		kubeVirtRTCheckerRoleBinding       *rbacv1.RoleBinding
+		kubeVirtRealTimeCheckerRole        *rbacv1.Role
+		kubeVirtRealTimeCheckerRoleBinding *rbacv1.RoleBinding
 	)
 
 	checkupServiceAccount = newServiceAccount()
@@ -180,35 +180,38 @@ func setupCheckupPermissions() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	kubeVirtRTCheckerRole = newKubeVirtRTCheckerRole()
-	kubeVirtRTCheckerRole, err = client.RbacV1().Roles(testNamespace).Create(
+	kubeVirtRealTimeCheckerRole = newKubeVirtRealTimeCheckerRole()
+	kubeVirtRealTimeCheckerRole, err = client.RbacV1().Roles(testNamespace).Create(
 		context.Background(),
-		kubeVirtRTCheckerRole,
+		kubeVirtRealTimeCheckerRole,
 		metav1.CreateOptions{},
 	)
 	Expect(err).NotTo(HaveOccurred())
 
 	DeferCleanup(func() {
-		err = client.RbacV1().Roles(kubeVirtRTCheckerRole.Namespace).Delete(
+		err = client.RbacV1().Roles(kubeVirtRealTimeCheckerRole.Namespace).Delete(
 			context.Background(),
-			kubeVirtRTCheckerRole.Name,
+			kubeVirtRealTimeCheckerRole.Name,
 			metav1.DeleteOptions{},
 		)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	kubeVirtRTCheckerRoleBinding = newRoleBinding(kubeVirtRTCheckerRole.Name, checkupServiceAccount.Name, kubeVirtRTCheckerRole.Name)
-	kubeVirtRTCheckerRoleBinding, err = client.RbacV1().RoleBindings(testNamespace).Create(
+	kubeVirtRealTimeCheckerRoleBinding = newRoleBinding(
+		kubeVirtRealTimeCheckerRole.Name,
+		checkupServiceAccount.Name,
+		kubeVirtRealTimeCheckerRole.Name,
+	)
+	kubeVirtRealTimeCheckerRoleBinding, err = client.RbacV1().RoleBindings(testNamespace).Create(
 		context.Background(),
-		kubeVirtRTCheckerRoleBinding,
+		kubeVirtRealTimeCheckerRoleBinding,
 		metav1.CreateOptions{},
 	)
 	Expect(err).NotTo(HaveOccurred())
-
 	DeferCleanup(func() {
-		err = client.RbacV1().RoleBindings(kubeVirtRTCheckerRoleBinding.Namespace).Delete(
+		err = client.RbacV1().RoleBindings(kubeVirtRealTimeCheckerRoleBinding.Namespace).Delete(
 			context.Background(),
-			kubeVirtRTCheckerRoleBinding.Name,
+			kubeVirtRealTimeCheckerRoleBinding.Name,
 			metav1.DeleteOptions{},
 		)
 		Expect(err).NotTo(HaveOccurred())
@@ -238,10 +241,10 @@ func newKiagnoseConfigMapAccessRole() *rbacv1.Role {
 	}
 }
 
-func newKubeVirtRTCheckerRole() *rbacv1.Role {
+func newKubeVirtRealTimeCheckerRole() *rbacv1.Role {
 	return &rbacv1.Role{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: testKubeVirtRTCheckerRoleName,
+			Name: testKubeVirtRealTimeCheckerRoleName,
 		},
 		Rules: []rbacv1.PolicyRule{
 			{
