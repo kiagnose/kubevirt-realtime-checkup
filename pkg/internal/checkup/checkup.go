@@ -56,6 +56,7 @@ type Checkup struct {
 	vmi       *kvcorev1.VirtualMachineInstance
 	results   status.Results
 	executor  testExecutor
+	cfg       config.Config
 }
 
 const VMINamePrefix = "rt-vmi"
@@ -66,6 +67,7 @@ func New(client kubeVirtVMIClient, namespace string, checkupConfig config.Config
 		namespace: namespace,
 		vmi:       newRealtimeVMI(checkupConfig),
 		executor:  executor,
+		cfg:       checkupConfig,
 	}
 }
 
@@ -100,6 +102,10 @@ func (c *Checkup) Run(ctx context.Context) error {
 	}
 	c.results.VMUnderTestActualNodeName = c.vmi.Status.NodeName
 
+	if c.results.OslatMaxLatency > c.cfg.OslatLatencyThreshold {
+		return fmt.Errorf("oslat Max Latency measured %s exceeded the given threshold %s",
+			c.results.OslatMaxLatency.String(), c.cfg.OslatLatencyThreshold.String())
+	}
 	return nil
 }
 
