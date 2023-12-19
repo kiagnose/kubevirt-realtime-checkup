@@ -59,7 +59,7 @@ type Checkup struct {
 	cfg       config.Config
 }
 
-const VMINamePrefix = "rt-vmi"
+const VMINamePrefix = "realtime-vmi-under-test"
 
 func New(client kubeVirtVMIClient, namespace string, checkupConfig config.Config, executor testExecutor) *Checkup {
 	return &Checkup{
