@@ -43,12 +43,15 @@ const (
 	testCheckupJobName                  = "realtime-checkup"
 )
 
-var _ = Describe("Checkup execution", func() {
+var _ = Describe("Checkup execution", Ordered, func() {
 	var (
 		configMap  *corev1.ConfigMap
 		checkupJob *batchv1.Job
 	)
 
+	BeforeAll(func() {
+		checkupReporter.Cleanup()
+	})
 	BeforeEach(func() {
 		setupCheckupPermissions()
 
