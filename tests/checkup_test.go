@@ -52,6 +52,11 @@ var _ = Describe("Checkup execution", Ordered, func() {
 	BeforeAll(func() {
 		checkupReporter.Cleanup()
 	})
+
+	JustAfterEach(func() {
+		checkupReporter.CollectArtifacts()
+	})
+
 	BeforeEach(func() {
 		setupCheckupPermissions()
 
