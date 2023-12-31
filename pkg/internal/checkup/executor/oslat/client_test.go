@@ -137,7 +137,7 @@ func (c fakeClock) Now() time.Time {
 }
 
 const (
-	oslatRunCmd             = "taskset -c 1-2 oslat --cpu-list 1-2 --rtprio 1 --duration 1m0s --workload memmove --workload-mem 4K \n"
+	oslatRunCmd             = "taskset -c 2-3 oslat --cpu-list 2-3 --rtprio 1 --duration 1m0s --workload memmove --workload-mem 4K \n"
 	oslatRunResultsTemplate = "oslat V 2.60\n" +
 		"Total runtime: \t\t60 seconds\n" +
 		"Thread priority: \tSCHED_FIFO:1\n" +

@@ -198,7 +198,7 @@ func getMaxLatencyValue(values []string, units string) (time.Duration, error) {
 
 func buildOslatCmd(testDuration time.Duration) string {
 	const (
-		cpuList          = "1-2"
+		cpuList          = "2-3"
 		realtimePriority = "1"
 		workload         = "memmove"
 		workloadMemory   = "4K"
