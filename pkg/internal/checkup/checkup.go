@@ -198,7 +198,7 @@ func (c *Checkup) waitForVMIDeletion(ctx context.Context) error {
 func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
 	const (
 		CPUSocketsCount   = 1
-		CPUCoresCount     = 3
+		CPUCoresCount     = 4
 		CPUTreadsCount    = 1
 		hugePageSize      = "1Gi"
 		guestMemory       = "4Gi"
