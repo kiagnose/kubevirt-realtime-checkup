@@ -33,8 +33,12 @@ install_packages() {
   dnf --enablerepo=nfv install -y tuned-profiles-nfv-guest
 }
 
-swapoff -a
-sed -i '/swap/s/^/#/' /etc/fstab
+# Disable swap
+disable_swap() {
+  swapoff -a
+  sed -i '/swap/s/^/#/' /etc/fstab
+}
 
 disable_services
 install_packages
+disable_swap
