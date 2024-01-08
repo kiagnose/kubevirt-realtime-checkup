@@ -19,12 +19,18 @@
 
 set -e
 
-systemctl disable NetworkManager-wait-online
-systemctl disable sshd
-systemctl disable irqbalance
+# Disable unnecessary services
+disable_services() {
+  local service_list=("NetworkManager-wait-online" "sshd" "irqbalance")
+  for service in "${service_list[@]}"; do
+    systemctl disable "$service"
+  done
+}
 
 dnf --enablerepo=rt install -y tuned-profiles-realtime
 dnf --enablerepo=nfv install -y tuned-profiles-nfv-guest
 
 swapoff -a
 sed -i '/swap/s/^/#/' /etc/fstab
+
+disable_services
