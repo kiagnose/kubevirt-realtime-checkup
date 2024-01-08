@@ -27,10 +27,14 @@ disable_services() {
   done
 }
 
-dnf --enablerepo=rt install -y tuned-profiles-realtime
-dnf --enablerepo=nfv install -y tuned-profiles-nfv-guest
+# Install required packages
+install_packages() {
+  dnf --enablerepo=rt install -y tuned-profiles-realtime
+  dnf --enablerepo=nfv install -y tuned-profiles-nfv-guest
+}
 
 swapoff -a
 sed -i '/swap/s/^/#/' /etc/fstab
 
 disable_services
+install_packages
