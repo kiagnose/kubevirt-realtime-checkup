@@ -19,8 +19,9 @@
 
 set -e
 
-systemctl mask "$(systemctl --type swap | grep '.swap' | awk '{print $1}')"
-
+if systemctl --type swap list-units | grep -q '.swap'; then
+  systemctl mask "$(systemctl --type swap list-units | grep '.swap' | awk '{print $1}')"
+fi
 echo isolated_cores=2-3 >> /etc/tuned/realtime-virtual-guest-variables.conf
 echo isolate_managed_irq=Y >> /etc/tuned/realtime-virtual-guest-variables.conf
 tuned-adm profile realtime-virtual-guest
