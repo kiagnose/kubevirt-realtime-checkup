@@ -101,6 +101,17 @@ func RetValue(retcode string) string {
 	return "\n" + retcode + CRLF + ".*" + PromptExpression
 }
 
+func (e Expecter) GetGuestKernelArgs() (string, error) {
+	const cmdLineCmd = "cat /proc/cmdline\n"
+	batch := []expect.Batcher{
+		&expect.BSnd{S: cmdLineCmd},
+		&expect.BExp{R: PromptExpression},
+	}
+	const printKernelArgsTimeout = 30 * time.Second
+	resp, err := e.SafeExpectBatchWithResponse(batch, printKernelArgsTimeout)
+	return resp[0].Output, err
+}
+
 // SafeExpectBatchWithResponse runs the batch from `expected`, connecting to a VMI's console and
 // waiting for the batch to return with a response until timeout.
 // It validates that the commands arrive to the console.
