@@ -62,6 +62,9 @@ func (e Executor) Execute(ctx context.Context, vmiUnderTestName string) (status.
 		return status.Results{}, fmt.Errorf("failed to login to VMI \"%s/%s\": %w", e.namespace, vmiUnderTestName, err)
 	}
 
+	kernelArgs, _ := vmiUnderTestConsoleExpecter.GetGuestKernelArgs()
+	log.Printf("VMI under test guest kernel Args: %s", kernelArgs)
+
 	oslatClient := oslat.NewClient(vmiUnderTestConsoleExpecter, e.OslatDuration)
 	log.Printf("Running Oslat test on VMI under test for %s...", e.OslatDuration.String())
 	maxLatency, err := oslatClient.Run(ctx)
