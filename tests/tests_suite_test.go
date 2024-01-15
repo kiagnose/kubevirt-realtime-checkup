@@ -66,6 +66,10 @@ var _ = BeforeSuite(func() {
 	artifactsDir := os.Getenv(artifactsEnvVarName)
 
 	checkupReporter = reporter.New(reporter.CheckupReporter{
-		ArtifactsDir: artifactsDir,
+		Client:        client,
+		ArtifactsDir:  artifactsDir,
+		Namespace:     testNamespace,
+		JobName:       testCheckupJobName,
+		ConfigMapName: testConfigMapName,
 	})
 })
