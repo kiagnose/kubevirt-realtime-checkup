@@ -105,3 +105,26 @@ func (e Expecter) LoginToCentOS(username, password string) error {
 	}
 	return nil
 }
+
+func configureConsole(expecter expect.Expecter, shouldSudo bool) error {
+	sudoString := ""
+	if shouldSudo {
+		sudoString = "sudo "
+	}
+	batch := []expect.Batcher{
+		&expect.BSnd{S: "stty cols 500 rows 500\n"},
+		&expect.BExp{R: PromptExpression},
+		&expect.BSnd{S: "echo $?\n"},
+		&expect.BExp{R: RetValue("0")},
+		&expect.BSnd{S: fmt.Sprintf("%sdmesg -n 1\n", sudoString)},
+		&expect.BExp{R: PromptExpression},
+		&expect.BSnd{S: "echo $?\n"},
+		&expect.BExp{R: RetValue("0")},
+	}
+	const configureConsoleTimeout = 30 * time.Second
+	resp, err := expecter.ExpectBatch(batch, configureConsoleTimeout)
+	if err != nil {
+		log.Printf("%v", resp)
+	}
+	return err
+}
