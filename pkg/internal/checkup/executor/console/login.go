@@ -48,7 +48,7 @@ func (e Expecter) LoginToCentOS(username, password string) error {
 
 	// Do not login, if we already logged in
 	loggedInPromptRegex := fmt.Sprintf(
-		`(\[%s@(localhost|centos|%s) ~\]\$ |\[root@(localhost|centos|%s) centos\]\# )`, username, e.vmiName, e.vmiName,
+		`(\[%s@(localhost|centos|%s) ~\]\$ |\[root@(localhost|centos|%s) ~\]\# )`, username, e.vmiName, e.vmiName,
 	)
 	b := []expect.Batcher{
 		&expect.BSnd{S: "\n"},
