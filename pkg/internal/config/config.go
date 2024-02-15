@@ -35,7 +35,6 @@ const (
 )
 
 const (
-	VMIUsername = "root"
 	VMIPassword = "redhat" // #nosec
 
 	VMUnderTestDefaultContainerDiskImage = "quay.io/kiagnose/kubevirt-realtime-checkup-vm:main"

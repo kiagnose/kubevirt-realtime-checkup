@@ -40,7 +40,6 @@ type vmiSerialConsoleClient interface {
 type Executor struct {
 	vmiSerialClient vmiSerialConsoleClient
 	namespace       string
-	vmiUsername     string
 	vmiPassword     string
 	OslatDuration   time.Duration
 }
@@ -49,7 +48,6 @@ func New(client vmiSerialConsoleClient, namespace string, cfg config.Config) Exe
 	return Executor{
 		vmiSerialClient: client,
 		namespace:       namespace,
-		vmiUsername:     config.VMIUsername,
 		vmiPassword:     config.VMIPassword,
 		OslatDuration:   cfg.OslatDuration,
 	}
@@ -58,7 +56,7 @@ func New(client vmiSerialConsoleClient, namespace string, cfg config.Config) Exe
 func (e Executor) Execute(ctx context.Context, vmiUnderTestName string) (status.Results, error) {
 	log.Printf("Login to VMI under test...")
 	vmiUnderTestConsoleExpecter := console.NewExpecter(e.vmiSerialClient, e.namespace, vmiUnderTestName)
-	if err := vmiUnderTestConsoleExpecter.LoginToCentOS(e.vmiUsername, e.vmiPassword); err != nil {
+	if err := vmiUnderTestConsoleExpecter.LoginToCentOSAsRoot(e.vmiPassword); err != nil {
 		return status.Results{}, fmt.Errorf("failed to login to VMI \"%s/%s\": %w", e.namespace, vmiUnderTestName, err)
 	}
 
