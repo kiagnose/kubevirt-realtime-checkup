@@ -99,24 +99,20 @@ func (e Expecter) LoginToCentOS(username, password string) error {
 		}
 	}
 
-	err = configureConsole(genExpect, false)
+	err = configureConsole(genExpect)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func configureConsole(expecter expect.Expecter, shouldSudo bool) error {
-	sudoString := ""
-	if shouldSudo {
-		sudoString = "sudo "
-	}
+func configureConsole(expecter expect.Expecter) error {
 	batch := []expect.Batcher{
 		&expect.BSnd{S: "stty cols 500 rows 500\n"},
 		&expect.BExp{R: PromptExpression},
 		&expect.BSnd{S: "echo $?\n"},
 		&expect.BExp{R: RetValue("0")},
-		&expect.BSnd{S: fmt.Sprintf("%sdmesg -n 1\n", sudoString)},
+		&expect.BSnd{S: "dmesg -n 1\n"},
 		&expect.BExp{R: PromptExpression},
 		&expect.BSnd{S: "echo $?\n"},
 		&expect.BExp{R: RetValue("0")},
