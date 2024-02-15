@@ -87,8 +87,6 @@ func (e Expecter) LoginToCentOS(username, password string) error {
 				T: expect.OK(),
 			},
 		}},
-		&expect.BSnd{S: "sudo su\n"},
-		&expect.BExp{R: PromptExpression},
 	}
 	const loginTimeout = 2 * time.Minute
 	res, err := genExpect.ExpectBatch(b, loginTimeout)

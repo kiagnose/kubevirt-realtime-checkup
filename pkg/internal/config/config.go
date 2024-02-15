@@ -35,8 +35,8 @@ const (
 )
 
 const (
-	VMIUsername = "cloud-user"
-	VMIPassword = "0tli-pxem-xknu" // #nosec
+	VMIUsername = "root"
+	VMIPassword = "redhat" // #nosec
 
 	VMUnderTestDefaultContainerDiskImage = "quay.io/kiagnose/kubevirt-realtime-checkup-vm:main"
 	OslatDefaultDuration                 = 5 * time.Minute

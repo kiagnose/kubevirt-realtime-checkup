@@ -23,7 +23,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -197,13 +196,12 @@ func (c *Checkup) waitForVMIDeletion(ctx context.Context) error {
 
 func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
 	const (
-		CPUSocketsCount   = 1
-		CPUCoresCount     = 4
-		CPUTreadsCount    = 1
-		hugePageSize      = "1Gi"
-		guestMemory       = "4Gi"
-		rootDiskName      = "rootdisk"
-		cloudInitDiskName = "cloudinitdisk"
+		CPUSocketsCount = 1
+		CPUCoresCount   = 4
+		CPUTreadsCount  = 1
+		hugePageSize    = "1Gi"
+		guestMemory     = "4Gi"
+		rootDiskName    = "rootdisk"
 	)
 
 	return vmi.New(randomizeName(VMINamePrefix),
@@ -221,8 +219,6 @@ func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstanc
 		vmi.WithNodeSelector(checkupConfig.VMUnderTestTargetNodeName),
 		vmi.WithContainerDisk(rootDiskName, checkupConfig.VMUnderTestContainerDiskImage),
 		vmi.WithVirtIODisk(rootDiskName),
-		vmi.WithCloudInitNoCloudVolume(cloudInitDiskName, CloudInit(config.VMIUsername, config.VMIPassword)),
-		vmi.WithVirtIODisk(cloudInitDiskName),
 	)
 }
 
@@ -234,15 +230,4 @@ func randomizeName(prefix string) string {
 
 func ObjectFullName(namespace, name string) string {
 	return fmt.Sprintf("%s/%s", namespace, name)
-}
-
-func CloudInit(username, password string) string {
-	sb := strings.Builder{}
-	sb.WriteString("#cloud-config\n")
-	sb.WriteString(fmt.Sprintf("user: %s\n", username))
-	sb.WriteString(fmt.Sprintf("password: %s\n", password))
-	sb.WriteString("chpasswd:\n")
-	sb.WriteString("  expire: false")
-
-	return sb.String()
 }
