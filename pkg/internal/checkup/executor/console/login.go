@@ -29,7 +29,7 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-func (e Expecter) LoginToCentOS(username, password string) error {
+func (e Expecter) LoginToCentOSAsRoot(password string) error {
 	const (
 		connectionTimeout = 10 * time.Second
 		promptTimeout     = 5 * time.Second
@@ -47,9 +47,7 @@ func (e Expecter) LoginToCentOS(username, password string) error {
 	}
 
 	// Do not login, if we already logged in
-	loggedInPromptRegex := fmt.Sprintf(
-		`(\[%s@(localhost|centos|%s) ~\]\$ |\[root@(localhost|centos|%s) ~\]\# )`, username, e.vmiName, e.vmiName,
-	)
+	loggedInPromptRegex := fmt.Sprintf(`(\[root@(localhost|centos|%s) ~\]\# )`, e.vmiName)
 	b := []expect.Batcher{
 		&expect.BSnd{S: "\n"},
 		&expect.BExp{R: loggedInPromptRegex},
@@ -67,7 +65,7 @@ func (e Expecter) LoginToCentOS(username, password string) error {
 				// Using only "login: " would match things like "Last failed login: Tue Jun  9 22:25:30 UTC 2020 on ttyS0"
 				// and in case the VM's did not get hostname form DHCP server try the default hostname
 				R:  regexp.MustCompile(fmt.Sprintf(`(localhost|centos|%s) login: `, e.vmiName)),
-				S:  fmt.Sprintf("%s\n", username),
+				S:  "root\n",
 				T:  expect.Next(),
 				Rt: 10,
 			},
