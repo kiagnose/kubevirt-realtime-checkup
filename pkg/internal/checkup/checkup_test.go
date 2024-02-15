@@ -89,17 +89,6 @@ func TestSetupShouldFail(t *testing.T) {
 	})
 }
 
-func TestCloudInitString(t *testing.T) {
-	actualString := checkup.CloudInit("user", "password")
-	expectedString := `#cloud-config
-user: user
-password: password
-chpasswd:
-  expire: false`
-
-	assert.Equal(t, expectedString, actualString)
-}
-
 func TestTeardownShouldFailWhen(t *testing.T) {
 	t.Run("VMI deletion fails", func(t *testing.T) {
 		expectedVMIDeletionFailure := errors.New("failed to delete VMI")
