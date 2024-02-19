@@ -23,6 +23,7 @@ import (
 	"context"
 	"time"
 
+	k8scorev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 
@@ -67,4 +68,8 @@ func (c *Client) VMISerialConsole(namespace, name string, timeout time.Duration)
 		name,
 		&kubecli.SerialConsoleOptions{ConnectionTimeout: timeout},
 	)
+}
+
+func (c *Client) CreateConfigMap(ctx context.Context, namespace string, configMap *k8scorev1.ConfigMap) (*k8scorev1.ConfigMap, error) {
+	return c.CoreV1().ConfigMaps(namespace).Create(ctx, configMap, metav1.CreateOptions{})
 }
