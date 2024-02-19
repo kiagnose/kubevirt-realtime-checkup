@@ -51,6 +51,8 @@ func TestCheckupShouldSucceed(t *testing.T) {
 
 	assert.NoError(t, testCheckup.Setup(context.Background()))
 
+	assert.NotEmpty(t, testClient.createdConfigMaps)
+
 	vmiName := testClient.VMIName()
 	assert.NotEmpty(t, vmiName)
 
@@ -67,6 +69,18 @@ func TestCheckupShouldSucceed(t *testing.T) {
 }
 
 func TestSetupShouldFail(t *testing.T) {
+	t.Run("when VM under test's ConfigMap creation fails", func(t *testing.T) {
+		expectedConfigMapCreationError := errors.New("failed to create ConfigMap")
+
+		testClient := newClientStub()
+		testConfig := newTestConfig()
+		testClient.configMapCreationFailure = expectedConfigMapCreationError
+		testCheckup := checkup.New(testClient, testNamespace, testConfig, executorStub{})
+
+		assert.ErrorContains(t, testCheckup.Setup(context.Background()), expectedConfigMapCreationError.Error())
+		assert.Empty(t, testClient.createdVMIs)
+	})
+
 	t.Run("when VMI creation fails", func(t *testing.T) {
 		expectedVMICreationFailure := errors.New("failed to create VMI")
 
@@ -118,15 +132,18 @@ func TestTeardownShouldFailWhen(t *testing.T) {
 }
 
 type clientStub struct {
-	createdVMIs        map[string]*kvcorev1.VirtualMachineInstance
-	vmiCreationFailure error
-	vmiReadFailure     error
-	vmiDeletionFailure error
+	createdVMIs              map[string]*kvcorev1.VirtualMachineInstance
+	vmiCreationFailure       error
+	vmiReadFailure           error
+	vmiDeletionFailure       error
+	createdConfigMaps        map[string]*corev1.ConfigMap
+	configMapCreationFailure error
 }
 
 func newClientStub() *clientStub {
 	return &clientStub{
-		createdVMIs: map[string]*kvcorev1.VirtualMachineInstance{},
+		createdVMIs:       map[string]*kvcorev1.VirtualMachineInstance{},
+		createdConfigMaps: map[string]*corev1.ConfigMap{},
 	}
 }
 
@@ -178,6 +195,19 @@ func (cs *clientStub) DeleteVirtualMachineInstance(_ context.Context, namespace,
 	delete(cs.createdVMIs, vmiFullName)
 
 	return nil
+}
+
+func (cs *clientStub) CreateConfigMap(_ context.Context, namespace string, configMap *corev1.ConfigMap) (*corev1.ConfigMap, error) {
+	if cs.configMapCreationFailure != nil {
+		return nil, cs.configMapCreationFailure
+	}
+
+	configMap.Namespace = namespace
+
+	configMapFullName := checkup.ObjectFullName(configMap.Namespace, configMap.Name)
+	cs.createdConfigMaps[configMapFullName] = configMap
+
+	return configMap, nil
 }
 
 func (cs *clientStub) VMIName() string {

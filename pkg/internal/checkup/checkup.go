@@ -32,6 +32,7 @@ import (
 
 	kvcorev1 "kubevirt.io/api/core/v1"
 
+	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/checkup/configmap"
 	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/checkup/vmi"
 	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/config"
 	"github.com/kiagnose/kubevirt-realtime-checkup/pkg/internal/status"
@@ -43,6 +44,7 @@ type kubeVirtVMIClient interface {
 		vmi *kvcorev1.VirtualMachineInstance) (*kvcorev1.VirtualMachineInstance, error)
 	GetVirtualMachineInstance(ctx context.Context, namespace, name string) (*kvcorev1.VirtualMachineInstance, error)
 	DeleteVirtualMachineInstance(ctx context.Context, namespace, name string) error
+	CreateConfigMap(ctx context.Context, namespace string, configMap *corev1.ConfigMap) (*corev1.ConfigMap, error)
 }
 
 type testExecutor interface {
@@ -50,23 +52,28 @@ type testExecutor interface {
 }
 
 type Checkup struct {
-	client    kubeVirtVMIClient
-	namespace string
-	vmi       *kvcorev1.VirtualMachineInstance
-	results   status.Results
-	executor  testExecutor
-	cfg       config.Config
+	client               kubeVirtVMIClient
+	namespace            string
+	vmUnderTestConfigMap *corev1.ConfigMap
+	vmi                  *kvcorev1.VirtualMachineInstance
+	results              status.Results
+	executor             testExecutor
+	cfg                  config.Config
 }
 
-const VMINamePrefix = "realtime-vmi-under-test"
+const (
+	VMUnderTestConfigMapNamePrefix = "realtime-vm-config"
+	VMINamePrefix                  = "realtime-vmi-under-test"
+)
 
 func New(client kubeVirtVMIClient, namespace string, checkupConfig config.Config, executor testExecutor) *Checkup {
 	return &Checkup{
-		client:    client,
-		namespace: namespace,
-		vmi:       newRealtimeVMI(checkupConfig),
-		executor:  executor,
-		cfg:       checkupConfig,
+		client:               client,
+		namespace:            namespace,
+		vmUnderTestConfigMap: newVMUnderTestConfigMap(checkupConfig),
+		vmi:                  newRealtimeVMI(checkupConfig),
+		executor:             executor,
+		cfg:                  checkupConfig,
 	}
 }
 
@@ -74,6 +81,12 @@ func (c *Checkup) Setup(ctx context.Context) error {
 	const setupTimeout = 10 * time.Minute
 	setupCtx, cancel := context.WithTimeout(ctx, setupTimeout)
 	defer cancel()
+
+	const errMessagePrefix = "Setup"
+
+	if err := c.createVMUnderTestCM(setupCtx); err != nil {
+		return fmt.Errorf("%s: %w", errMessagePrefix, err)
+	}
 
 	createdVMI, err := c.client.CreateVirtualMachineInstance(setupCtx, c.namespace, c.vmi)
 	if err != nil {
@@ -124,6 +137,13 @@ func (c *Checkup) Teardown(ctx context.Context) error {
 
 func (c *Checkup) Results() status.Results {
 	return c.results
+}
+
+func (c *Checkup) createVMUnderTestCM(ctx context.Context) error {
+	log.Printf("Creating ConfigMap %q...", ObjectFullName(c.namespace, c.vmUnderTestConfigMap.Name))
+
+	_, err := c.client.CreateConfigMap(ctx, c.namespace, c.vmUnderTestConfigMap)
+	return err
 }
 
 func (c *Checkup) waitForVMIToBoot(ctx context.Context) (*kvcorev1.VirtualMachineInstance, error) {
@@ -192,6 +212,10 @@ func (c *Checkup) waitForVMIDeletion(ctx context.Context) error {
 	log.Printf("VMI %q was deleted successfully", vmiFullName)
 
 	return nil
+}
+
+func newVMUnderTestConfigMap(checkupConfig config.Config) *corev1.ConfigMap {
+	return configmap.New(VMUnderTestConfigMapNamePrefix, checkupConfig.PodName, checkupConfig.PodUID)
 }
 
 func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
