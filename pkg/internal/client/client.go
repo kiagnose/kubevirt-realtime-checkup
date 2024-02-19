@@ -73,3 +73,7 @@ func (c *Client) VMISerialConsole(namespace, name string, timeout time.Duration)
 func (c *Client) CreateConfigMap(ctx context.Context, namespace string, configMap *k8scorev1.ConfigMap) (*k8scorev1.ConfigMap, error) {
 	return c.CoreV1().ConfigMaps(namespace).Create(ctx, configMap, metav1.CreateOptions{})
 }
+
+func (c *Client) DeleteConfigMap(ctx context.Context, namespace, name string) error {
+	return c.CoreV1().ConfigMaps(namespace).Delete(ctx, name, metav1.DeleteOptions{})
+}
