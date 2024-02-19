@@ -45,6 +45,7 @@ type kubeVirtVMIClient interface {
 	GetVirtualMachineInstance(ctx context.Context, namespace, name string) (*kvcorev1.VirtualMachineInstance, error)
 	DeleteVirtualMachineInstance(ctx context.Context, namespace, name string) error
 	CreateConfigMap(ctx context.Context, namespace string, configMap *corev1.ConfigMap) (*corev1.ConfigMap, error)
+	DeleteConfigMap(ctx context.Context, namespace, name string) error
 }
 
 type testExecutor interface {
@@ -128,6 +129,10 @@ func (c *Checkup) Teardown(ctx context.Context) error {
 		return fmt.Errorf("%s: %w", errPrefix, err)
 	}
 
+	if err := c.deleteVMUnderTestCM(ctx); err != nil {
+		return fmt.Errorf("%s: %w", errPrefix, err)
+	}
+
 	if err := c.waitForVMIDeletion(ctx); err != nil {
 		return fmt.Errorf("%s: %w", errPrefix, err)
 	}
@@ -144,6 +149,12 @@ func (c *Checkup) createVMUnderTestCM(ctx context.Context) error {
 
 	_, err := c.client.CreateConfigMap(ctx, c.namespace, c.vmUnderTestConfigMap)
 	return err
+}
+
+func (c *Checkup) deleteVMUnderTestCM(ctx context.Context) error {
+	log.Printf("Deleting ConfigMap %q...", ObjectFullName(c.namespace, c.vmUnderTestConfigMap.Name))
+
+	return c.client.DeleteConfigMap(ctx, c.namespace, c.vmUnderTestConfigMap.Name)
 }
 
 func (c *Checkup) waitForVMIToBoot(ctx context.Context) (*kvcorev1.VirtualMachineInstance, error) {

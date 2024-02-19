@@ -59,6 +59,8 @@ func TestCheckupShouldSucceed(t *testing.T) {
 	assert.NoError(t, testCheckup.Run(context.Background()))
 	assert.NoError(t, testCheckup.Teardown(context.Background()))
 
+	assert.Empty(t, testClient.createdConfigMaps)
+
 	_, err := testClient.GetVirtualMachineInstance(context.Background(), testNamespace, vmiName)
 	assert.ErrorContains(t, err, "not found")
 
@@ -129,6 +131,23 @@ func TestTeardownShouldFailWhen(t *testing.T) {
 		testClient.vmiReadFailure = expectedReadFailure
 		assert.ErrorContains(t, testCheckup.Teardown(context.Background()), expectedReadFailure.Error())
 	})
+
+	t.Run("VM under test ConfigMap deletion fails", func(t *testing.T) {
+		testClient := newClientStub()
+		testConfig := newTestConfig()
+
+		testCheckup := checkup.New(testClient, testNamespace, testConfig, executorStub{})
+
+		assert.NoError(t, testCheckup.Setup(context.Background()))
+		assert.NotEmpty(t, testClient.createdConfigMaps)
+
+		assert.NoError(t, testCheckup.Run(context.Background()))
+
+		expectedCMDeletionFailure := errors.New("failed to delete ConfigMap")
+		testClient.configMapDeletionFailure = expectedCMDeletionFailure
+
+		assert.ErrorContains(t, testCheckup.Teardown(context.Background()), expectedCMDeletionFailure.Error())
+	})
 }
 
 type clientStub struct {
@@ -138,6 +157,7 @@ type clientStub struct {
 	vmiDeletionFailure       error
 	createdConfigMaps        map[string]*corev1.ConfigMap
 	configMapCreationFailure error
+	configMapDeletionFailure error
 }
 
 func newClientStub() *clientStub {
@@ -208,6 +228,22 @@ func (cs *clientStub) CreateConfigMap(_ context.Context, namespace string, confi
 	cs.createdConfigMaps[configMapFullName] = configMap
 
 	return configMap, nil
+}
+
+func (cs *clientStub) DeleteConfigMap(_ context.Context, namespace, name string) error {
+	if cs.configMapDeletionFailure != nil {
+		return cs.configMapDeletionFailure
+	}
+
+	configMapFullName := checkup.ObjectFullName(namespace, name)
+	_, exist := cs.createdConfigMaps[configMapFullName]
+	if !exist {
+		return k8serrors.NewNotFound(schema.GroupResource{Group: "", Resource: "configmaps"}, name)
+	}
+
+	delete(cs.createdConfigMaps, configMapFullName)
+
+	return nil
 }
 
 func (cs *clientStub) VMIName() string {
