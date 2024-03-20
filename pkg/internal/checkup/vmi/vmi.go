@@ -142,12 +142,6 @@ func WithAutoAttachSerialConsole() Option {
 	}
 }
 
-func AutoIOThreadPolicy() Option {
-	return func(vmi *kvcorev1.VirtualMachineInstance) {
-		vmi.Spec.Domain.IOThreadsPolicy = Pointer(kvcorev1.IOThreadsPolicyAuto)
-	}
-}
-
 func WithVirtIODisk(name string) Option {
 	return func(vmi *kvcorev1.VirtualMachineInstance) {
 		vmi.Spec.Domain.Devices.Disks = append(vmi.Spec.Domain.Devices.Disks, kvcorev1.Disk{

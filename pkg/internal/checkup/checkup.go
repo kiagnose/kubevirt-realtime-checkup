@@ -249,7 +249,6 @@ func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstanc
 		vmi.WithoutAutoAttachGraphicsDevice(),
 		vmi.WithoutAutoAttachMemBalloon(),
 		vmi.WithAutoAttachSerialConsole(),
-		vmi.AutoIOThreadPolicy(),
 		vmi.WithZeroTerminationGracePeriodSeconds(),
 		vmi.WithNodeSelector(checkupConfig.VMUnderTestTargetNodeName),
 		vmi.WithContainerDisk(rootDiskName, checkupConfig.VMUnderTestContainerDiskImage),
