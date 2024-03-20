@@ -231,12 +231,15 @@ func newVMUnderTestConfigMap(checkupConfig config.Config) *corev1.ConfigMap {
 
 func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
 	const (
-		CPUSocketsCount = 1
-		CPUCoresCount   = 4
-		CPUTreadsCount  = 1
-		hugePageSize    = "1Gi"
-		guestMemory     = "4Gi"
-		rootDiskName    = "rootdisk"
+		CPUSocketsCount   = 1
+		CPUCoresCount     = 4
+		CPUTreadsCount    = 1
+		hugePageSize      = "1Gi"
+		guestMemory       = "4Gi"
+		rootDiskName      = "rootdisk"
+		configDiskSerial  = "DEADBEEF"
+		cloudInitDiskName = "cloudinitdisk"
+		configVolumeName  = "realtime-config"
 	)
 
 	return vmi.New(randomizeName(VMINamePrefix),
@@ -253,7 +256,20 @@ func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstanc
 		vmi.WithNodeSelector(checkupConfig.VMUnderTestTargetNodeName),
 		vmi.WithContainerDisk(rootDiskName, checkupConfig.VMUnderTestContainerDiskImage),
 		vmi.WithVirtIODisk(rootDiskName),
+		vmi.WithConfigMapVolume(configVolumeName, VMUnderTestConfigMapNamePrefix),
+		vmi.WithConfigMapDisk(configVolumeName, configDiskSerial),
+		vmi.WithCloudInitNoCloudVolume(cloudInitDiskName,
+			vmi.CloudInit(realtimeVMIBootCommands(configDiskSerial))),
 	)
+}
+
+func realtimeVMIBootCommands(configDiskSerial string) []string {
+	const configMountDirectory = "/mnt/app-config"
+
+	return []string{
+		fmt.Sprintf("mkdir %s", configMountDirectory),
+		fmt.Sprintf("mount /dev/$(lsblk --nodeps -no name,serial | grep %s | cut -f1 -d' ') %s", configDiskSerial, configMountDirectory),
+	}
 }
 
 func randomizeName(prefix string) string {

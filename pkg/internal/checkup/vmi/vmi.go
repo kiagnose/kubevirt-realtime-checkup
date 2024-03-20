@@ -20,6 +20,9 @@
 package vmi
 
 import (
+	"fmt"
+	"strings"
+
 	corev1 "k8s.io/api/core/v1"
 
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -199,6 +202,31 @@ func WithContainerDisk(volumeName, imageName string) Option {
 	}
 }
 
+func WithConfigMapVolume(name, configMapName string) Option {
+	return func(vmi *kvcorev1.VirtualMachineInstance) {
+		vmi.Spec.Volumes = append(vmi.Spec.Volumes, kvcorev1.Volume{
+			Name: name,
+			VolumeSource: kvcorev1.VolumeSource{
+				ConfigMap: &kvcorev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
+					Optional:             Pointer(false),
+				},
+			},
+		})
+	}
+}
+
+func WithConfigMapDisk(name, serial string) Option {
+	return func(vmi *kvcorev1.VirtualMachineInstance) {
+		vmi.Spec.Domain.Devices.Disks = append(vmi.Spec.Domain.Devices.Disks,
+			kvcorev1.Disk{
+				Name:   name,
+				Serial: serial,
+			},
+		)
+	}
+}
+
 func WithCloudInitNoCloudVolume(name, userData string) Option {
 	return func(vmi *kvcorev1.VirtualMachineInstance) {
 		newVolume := kvcorev1.Volume{
@@ -212,6 +240,21 @@ func WithCloudInitNoCloudVolume(name, userData string) Option {
 
 		vmi.Spec.Volumes = append(vmi.Spec.Volumes, newVolume)
 	}
+}
+
+func CloudInit(bootCommands []string) string {
+	sb := strings.Builder{}
+	sb.WriteString("#cloud-config\n")
+
+	if len(bootCommands) != 0 {
+		sb.WriteString("bootcmd:\n")
+
+		for _, command := range bootCommands {
+			sb.WriteString(fmt.Sprintf("  - %q\n", command))
+		}
+	}
+
+	return sb.String()
 }
 
 func Pointer[T any](v T) *T {
