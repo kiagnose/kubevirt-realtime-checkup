@@ -44,7 +44,6 @@ setup_boot_service() {
   local service_name="realtime-checkup-boot.service"
   local checkup_boot_script_full_path="/usr/bin/realtime-checkup-boot.sh"
   local checkup_boot_service_full_path="/usr/lib/systemd/system/$service_name"
-  local checkup_boot_ready_marker_full_path="/var/realtime-checkup-image-ready-marker"
 
   setup_checkup_boot_script "$checkup_boot_script_full_path"
 
@@ -52,10 +51,10 @@ setup_boot_service() {
 [Unit]
 Description=Checkup Boot Script
 Before=qemu-guest-agent.service
-ConditionPathExists=!$checkup_boot_ready_marker_full_path
 [Service]
 Type=oneshot
-ExecStart=$checkup_boot_script_full_path $checkup_boot_ready_marker_full_path
+ExecStart=$checkup_boot_script_full_path
+
 Restart=no
 User=root
 Group=root
@@ -92,7 +91,6 @@ cat <<'EOF' > "$checkup_boot_script_full_path"
 
 set -x
 
-checkup_boot_ready_marker_full_path=$1
 checkup_tuned_adm_set_marker_full_path="/var/realtime-checkup-tuned-adm-set-marker"
 
 if systemctl --type swap list-units | grep -q '.swap'; then
@@ -109,7 +107,8 @@ if [ ! -f "$checkup_tuned_adm_set_marker_full_path" ]; then
   exit 0
 fi
 
-touch $checkup_boot_ready_marker_full_path
+boot_script_readiness_marker_full_path="/tmp/realtime-checkup-ready-marker"
+touch $boot_script_readiness_marker_full_path
 EOF
 
   chmod +x "$checkup_boot_script_full_path"
