@@ -106,6 +106,7 @@ if [ ! -f "$checkup_tuned_adm_set_marker_full_path" ]; then
   tuned-adm profile realtime-virtual-guest
   touch $checkup_tuned_adm_set_marker_full_path
   reboot
+  exit 0
 fi
 
 touch $checkup_boot_ready_marker_full_path
