@@ -90,21 +90,25 @@ cat <<'EOF' > "$checkup_boot_script_full_path"
 # Copyright 2024 Red Hat, Inc.
 #
 
-set -e
+set -x
 
 checkup_boot_ready_marker_full_path=$1
+checkup_tuned_adm_set_marker_full_path="/var/realtime-checkup-tuned-adm-set-marker"
 
 if systemctl --type swap list-units | grep -q '.swap'; then
   systemctl mask "$(systemctl --type swap list-units | grep '.swap' | awk '{print $1}')"
 fi
 
-tuned_conf="/etc/tuned/realtime-virtual-guest-variables.conf"
-echo "isolated_cores=2-3" > "$tuned_conf"
-echo "isolate_managed_irq=Y" >> "$tuned_conf"
-tuned-adm profile realtime-virtual-guest
+if [ ! -f "$checkup_tuned_adm_set_marker_full_path" ]; then
+  tuned_conf="/etc/tuned/realtime-virtual-guest-variables.conf"
+  echo "isolated_cores=2-3" > "$tuned_conf"
+  echo "isolate_managed_irq=Y" >> "$tuned_conf"
+  tuned-adm profile realtime-virtual-guest
+  touch $checkup_tuned_adm_set_marker_full_path
+  reboot
+fi
 
 touch $checkup_boot_ready_marker_full_path
-reboot
 EOF
 
   chmod +x "$checkup_boot_script_full_path"
