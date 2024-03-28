@@ -36,8 +36,9 @@ func TestNew(t *testing.T) {
 	name := "my-cm"
 	ownerName := "my-pod"
 	ownerUID := "1234567890"
+	data := map[string]string{"key": "value"}
 
-	actualConfigMap := configmap.New(name, ownerName, ownerUID)
+	actualConfigMap := configmap.New(name, ownerName, ownerUID, data)
 
 	expectedConfigMap := &k8scorev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -51,7 +52,7 @@ func TestNew(t *testing.T) {
 				},
 			},
 		},
-		Data: nil,
+		Data: data,
 	}
 
 	assert.Equal(t, expectedConfigMap, actualConfigMap)
