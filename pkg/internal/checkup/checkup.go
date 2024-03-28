@@ -307,6 +307,7 @@ func realtimeVMIBootCommands(configDiskSerial string) []string {
 		fmt.Sprintf("mount /dev/$(lsblk --nodeps -no name,serial | grep %s | cut -f1 -d' ') %s", configDiskSerial, configMountDirectory),
 		fmt.Sprintf("cp %s %s", path.Join(configMountDirectory, config.BootScriptName), config.BootScriptBinDirectory),
 		fmt.Sprintf("chmod 744 %s", path.Join(config.BootScriptBinDirectory, config.BootScriptName)),
+		path.Join(config.BootScriptBinDirectory, config.BootScriptName),
 	}
 }
 
