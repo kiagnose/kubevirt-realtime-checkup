@@ -23,6 +23,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"path"
+	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -226,7 +228,13 @@ func (c *Checkup) waitForVMIDeletion(ctx context.Context) error {
 }
 
 func newVMUnderTestConfigMap(checkupConfig config.Config) *corev1.ConfigMap {
-	return configmap.New(VMUnderTestConfigMapNamePrefix, checkupConfig.PodName, checkupConfig.PodUID)
+	vmUnderTestConfigData := map[string]string{
+		config.BootScriptName: generateBootScript(),
+	}
+	return configmap.New(VMUnderTestConfigMapNamePrefix,
+		checkupConfig.PodName,
+		checkupConfig.PodUID,
+		vmUnderTestConfigData)
 }
 
 func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
@@ -263,12 +271,42 @@ func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstanc
 	)
 }
 
+func generateBootScript() string {
+	const isolatedCores = "2-3"
+	sb := strings.Builder{}
+
+	sb.WriteString("#!/bin/bash\n")
+	sb.WriteString("set -x\n")
+	sb.WriteString("\n")
+	sb.WriteString("checkup_tuned_adm_set_marker_full_path=" + config.BootScriptTunedAdmSetMarkerFileFullPath + "\n")
+	sb.WriteString("\n")
+	sb.WriteString("if systemctl --type swap list-units | grep -q '.swap'; then\n")
+	sb.WriteString("  systemctl mask \"$(systemctl --type swap list-units | grep '.swap' | awk '{print $1}')\"\n")
+	sb.WriteString("fi\n")
+	sb.WriteString("\n")
+	sb.WriteString("if [ ! -f \"$checkup_tuned_adm_set_marker_full_path\" ]; then\n")
+	sb.WriteString("  tuned_conf=\"/etc/tuned/realtime-virtual-guest-variables.conf\"\n")
+	sb.WriteString("  echo \"isolated_cores=" + isolatedCores + "\" > \"$tuned_conf\"\n")
+	sb.WriteString("  echo \"isolate_managed_irq=Y\" >> \"$tuned_conf\"\n")
+	sb.WriteString("  tuned-adm profile realtime-virtual-guest\n")
+	sb.WriteString("  touch $checkup_tuned_adm_set_marker_full_path\n")
+	sb.WriteString("  reboot\n")
+	sb.WriteString("  exit 0\n")
+	sb.WriteString("fi\n")
+	sb.WriteString("\n")
+	sb.WriteString("touch " + config.BootScriptReadinessMarkerFileFullPath + "\n")
+
+	return sb.String()
+}
+
 func realtimeVMIBootCommands(configDiskSerial string) []string {
 	const configMountDirectory = "/mnt/app-config"
 
 	return []string{
 		fmt.Sprintf("mkdir %s", configMountDirectory),
 		fmt.Sprintf("mount /dev/$(lsblk --nodeps -no name,serial | grep %s | cut -f1 -d' ') %s", configDiskSerial, configMountDirectory),
+		fmt.Sprintf("cp %s %s", path.Join(configMountDirectory, config.BootScriptName), config.BootScriptBinDirectory),
+		fmt.Sprintf("chmod 744 %s", path.Join(config.BootScriptBinDirectory, config.BootScriptName)),
 	}
 }
 

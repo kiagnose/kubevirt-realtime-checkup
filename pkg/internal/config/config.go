@@ -40,6 +40,11 @@ const (
 	VMUnderTestDefaultContainerDiskImage = "quay.io/kiagnose/kubevirt-realtime-checkup-vm:main"
 	OslatDefaultDuration                 = 5 * time.Minute
 	OslatDefaultLatencyThreshold         = 40 * time.Microsecond
+
+	BootScriptName                          = "realtime-checkup-boot.sh"
+	BootScriptBinDirectory                  = "/usr/bin/"
+	BootScriptTunedAdmSetMarkerFileFullPath = "/var/realtime-checkup-tuned-adm-set-marker"
+	BootScriptReadinessMarkerFileFullPath   = "/tmp/realtime-checkup-ready-marker"
 )
 
 var (

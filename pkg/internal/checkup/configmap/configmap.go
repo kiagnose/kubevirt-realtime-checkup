@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func New(name, ownerName, ownerUID string) *k8scorev1.ConfigMap {
+func New(name, ownerName, ownerUID string, data map[string]string) *k8scorev1.ConfigMap {
 	return &k8scorev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -39,5 +39,6 @@ func New(name, ownerName, ownerUID string) *k8scorev1.ConfigMap {
 				},
 			},
 		},
+		Data: data,
 	}
 }
