@@ -288,6 +288,7 @@ func generateBootScript() string {
 	sb.WriteString("  tuned_conf=\"/etc/tuned/realtime-virtual-guest-variables.conf\"\n")
 	sb.WriteString("  echo \"isolated_cores=" + isolatedCores + "\" > \"$tuned_conf\"\n")
 	sb.WriteString("  echo \"isolate_managed_irq=Y\" >> \"$tuned_conf\"\n")
+	sb.WriteString("  systemctl restart tuned.service\n")
 	sb.WriteString("  tuned-adm profile realtime-virtual-guest\n")
 	sb.WriteString("  touch $checkup_tuned_adm_set_marker_full_path\n")
 	sb.WriteString("  reboot\n")
