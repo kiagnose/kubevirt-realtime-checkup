@@ -39,6 +39,13 @@ disable_swap() {
   sed -i '/swap/s/^/#/' /etc/fstab
 }
 
+# Enable guest-exec on the qemu-guest-agent configuration
+enable_guest_exec() {
+  sed -i '/^BLACKLIST_RPC=/ { s/guest-exec-status//; s/guest-exec//g }' /etc/sysconfig/qemu-ga
+  sed -i '/^BLACKLIST_RPC=/ { s/,\+/,/g; s/^,\|,$//g }' /etc/sysconfig/qemu-ga
+}
+
 disable_services
 install_packages
 disable_swap
+enable_guest_exec
