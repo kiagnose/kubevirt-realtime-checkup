@@ -296,6 +296,7 @@ func generateBootScript() string {
 	sb.WriteString("fi\n")
 	sb.WriteString("\n")
 	sb.WriteString("touch " + config.BootScriptReadinessMarkerFileFullPath + "\n")
+	sb.WriteString("chcon -t virt_qemu_ga_exec_t " + config.BootScriptReadinessMarkerFileFullPath + "\n")
 
 	return sb.String()
 }
