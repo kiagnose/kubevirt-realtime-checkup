@@ -98,7 +98,7 @@ func (c *Checkup) Setup(ctx context.Context) error {
 	c.vmi = createdVMI
 
 	var updatedVMIUnderTest *kvcorev1.VirtualMachineInstance
-	updatedVMIUnderTest, err = c.waitForVMIToBoot(setupCtx)
+	updatedVMIUnderTest, err = c.waitForVMIToBeReady(setupCtx)
 	if err != nil {
 		return err
 	}
@@ -159,11 +159,11 @@ func (c *Checkup) deleteVMUnderTestCM(ctx context.Context) error {
 	return c.client.DeleteConfigMap(ctx, c.namespace, c.vmUnderTestConfigMap.Name)
 }
 
-func (c *Checkup) waitForVMIToBoot(ctx context.Context) (*kvcorev1.VirtualMachineInstance, error) {
+func (c *Checkup) waitForVMIToBeReady(ctx context.Context) (*kvcorev1.VirtualMachineInstance, error) {
 	vmiFullName := ObjectFullName(c.vmi.Namespace, c.vmi.Name)
 	var updatedVMI *kvcorev1.VirtualMachineInstance
 
-	log.Printf("Waiting for VMI %q to boot...", vmiFullName)
+	log.Printf("Waiting for VMI %q to be ready...", vmiFullName)
 
 	conditionFn := func(ctx context.Context) (bool, error) {
 		var err error
@@ -173,7 +173,7 @@ func (c *Checkup) waitForVMIToBoot(ctx context.Context) (*kvcorev1.VirtualMachin
 		}
 
 		for _, condition := range updatedVMI.Status.Conditions {
-			if condition.Type == kvcorev1.VirtualMachineInstanceAgentConnected && condition.Status == corev1.ConditionTrue {
+			if condition.Type == kvcorev1.VirtualMachineInstanceReady && condition.Status == corev1.ConditionTrue {
 				return true, nil
 			}
 		}
@@ -182,10 +182,10 @@ func (c *Checkup) waitForVMIToBoot(ctx context.Context) (*kvcorev1.VirtualMachin
 	}
 	const pollInterval = 5 * time.Second
 	if err := wait.PollImmediateUntilWithContext(ctx, pollInterval, conditionFn); err != nil {
-		return nil, fmt.Errorf("failed to wait for VMI %q to boot: %w", vmiFullName, err)
+		return nil, fmt.Errorf("failed to wait for VMI %q be ready: %w", vmiFullName, err)
 	}
 
-	log.Printf("VMI %q had successfully booted", vmiFullName)
+	log.Printf("VMI %q has successfully reached ready condition", vmiFullName)
 
 	return updatedVMI, nil
 }
@@ -268,6 +268,7 @@ func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstanc
 		vmi.WithConfigMapDisk(configVolumeName, configDiskSerial),
 		vmi.WithCloudInitNoCloudVolume(cloudInitDiskName,
 			vmi.CloudInit(realtimeVMIBootCommands(configDiskSerial))),
+		vmi.WithReadinessFileProbe(config.BootScriptReadinessMarkerFileFullPath),
 	)
 }
 

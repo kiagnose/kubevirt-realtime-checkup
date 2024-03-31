@@ -180,7 +180,7 @@ func (cs *clientStub) CreateVirtualMachineInstance(_ context.Context,
 	cs.createdVMIs[vmiFullName] = vmi
 
 	vmi.Status.Conditions = append(vmi.Status.Conditions, kvcorev1.VirtualMachineInstanceCondition{
-		Type:   kvcorev1.VirtualMachineInstanceAgentConnected,
+		Type:   kvcorev1.VirtualMachineInstanceReady,
 		Status: corev1.ConditionTrue,
 	})
 
