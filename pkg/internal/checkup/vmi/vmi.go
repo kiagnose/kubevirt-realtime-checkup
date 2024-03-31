@@ -257,6 +257,23 @@ func CloudInit(bootCommands []string) string {
 	return sb.String()
 }
 
+func WithReadinessFileProbe(fileName string) Option {
+	return func(vmi *kvcorev1.VirtualMachineInstance) {
+		var readinessProbeCommand = []string{"cat", fileName}
+		vmi.Spec.ReadinessProbe = &kvcorev1.Probe{
+			Handler: kvcorev1.Handler{
+				Exec: &corev1.ExecAction{
+					Command: readinessProbeCommand,
+				},
+			},
+			FailureThreshold:    30,
+			InitialDelaySeconds: 90,
+			PeriodSeconds:       10,
+			TimeoutSeconds:      10,
+		}
+	}
+}
+
 func Pointer[T any](v T) *T {
 	return &v
 }
