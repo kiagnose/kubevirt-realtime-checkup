@@ -73,11 +73,13 @@ func New(client kubeVirtVMIClient, namespace string, checkupConfig config.Config
 	const randomStringLen = 5
 	randomSuffix := k8srand.String(randomStringLen)
 
+	vmiUnderTestCMName := vmiUnderTestConfigMapName(randomSuffix)
+
 	return &Checkup{
 		client:               client,
 		namespace:            namespace,
-		vmUnderTestConfigMap: newVMUnderTestConfigMap(checkupConfig),
-		vmi:                  newRealtimeVMI(vmiUnderTestName(randomSuffix), checkupConfig),
+		vmUnderTestConfigMap: newVMUnderTestConfigMap(vmiUnderTestCMName, checkupConfig),
+		vmi:                  newRealtimeVMI(vmiUnderTestName(randomSuffix), checkupConfig, vmiUnderTestCMName),
 		executor:             executor,
 		cfg:                  checkupConfig,
 	}
@@ -230,17 +232,17 @@ func (c *Checkup) waitForVMIDeletion(ctx context.Context) error {
 	return nil
 }
 
-func newVMUnderTestConfigMap(checkupConfig config.Config) *corev1.ConfigMap {
+func newVMUnderTestConfigMap(name string, checkupConfig config.Config) *corev1.ConfigMap {
 	vmUnderTestConfigData := map[string]string{
 		config.BootScriptName: generateBootScript(),
 	}
-	return configmap.New(VMUnderTestConfigMapNamePrefix,
+	return configmap.New(name,
 		checkupConfig.PodName,
 		checkupConfig.PodUID,
 		vmUnderTestConfigData)
 }
 
-func newRealtimeVMI(name string, checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
+func newRealtimeVMI(name string, checkupConfig config.Config, configMapName string) *kvcorev1.VirtualMachineInstance {
 	const (
 		CPUSocketsCount   = 1
 		CPUCoresCount     = 4
@@ -267,7 +269,7 @@ func newRealtimeVMI(name string, checkupConfig config.Config) *kvcorev1.VirtualM
 		vmi.WithNodeSelector(checkupConfig.VMUnderTestTargetNodeName),
 		vmi.WithContainerDisk(rootDiskName, checkupConfig.VMUnderTestContainerDiskImage),
 		vmi.WithVirtIODisk(rootDiskName),
-		vmi.WithConfigMapVolume(configVolumeName, VMUnderTestConfigMapNamePrefix),
+		vmi.WithConfigMapVolume(configVolumeName, configMapName),
 		vmi.WithConfigMapDisk(configVolumeName, configDiskSerial),
 		vmi.WithCloudInitNoCloudVolume(cloudInitDiskName,
 			vmi.CloudInit(realtimeVMIBootCommands(configDiskSerial))),
@@ -319,6 +321,10 @@ func realtimeVMIBootCommands(configDiskSerial string) []string {
 
 func vmiUnderTestName(suffix string) string {
 	return VMINamePrefix + "-" + suffix
+}
+
+func vmiUnderTestConfigMapName(suffix string) string {
+	return VMUnderTestConfigMapNamePrefix + "-" + suffix
 }
 
 func ObjectFullName(namespace, name string) string {
