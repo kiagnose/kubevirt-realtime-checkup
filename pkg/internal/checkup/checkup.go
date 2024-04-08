@@ -70,11 +70,14 @@ const (
 )
 
 func New(client kubeVirtVMIClient, namespace string, checkupConfig config.Config, executor testExecutor) *Checkup {
+	const randomStringLen = 5
+	randomSuffix := k8srand.String(randomStringLen)
+
 	return &Checkup{
 		client:               client,
 		namespace:            namespace,
 		vmUnderTestConfigMap: newVMUnderTestConfigMap(checkupConfig),
-		vmi:                  newRealtimeVMI(checkupConfig),
+		vmi:                  newRealtimeVMI(vmiUnderTestName(randomSuffix), checkupConfig),
 		executor:             executor,
 		cfg:                  checkupConfig,
 	}
@@ -237,7 +240,7 @@ func newVMUnderTestConfigMap(checkupConfig config.Config) *corev1.ConfigMap {
 		vmUnderTestConfigData)
 }
 
-func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
+func newRealtimeVMI(name string, checkupConfig config.Config) *kvcorev1.VirtualMachineInstance {
 	const (
 		CPUSocketsCount   = 1
 		CPUCoresCount     = 4
@@ -250,7 +253,7 @@ func newRealtimeVMI(checkupConfig config.Config) *kvcorev1.VirtualMachineInstanc
 		configVolumeName  = "realtime-config"
 	)
 
-	return vmi.New(randomizeName(VMINamePrefix),
+	return vmi.New(name,
 		vmi.WithOwnerReference(checkupConfig.PodName, checkupConfig.PodUID),
 		vmi.WithoutCRIOCPULoadBalancing(),
 		vmi.WithoutCRIOCPUQuota(),
@@ -314,10 +317,8 @@ func realtimeVMIBootCommands(configDiskSerial string) []string {
 	}
 }
 
-func randomizeName(prefix string) string {
-	const randomStringLen = 5
-
-	return fmt.Sprintf("%s-%s", prefix, k8srand.String(randomStringLen))
+func vmiUnderTestName(suffix string) string {
+	return VMINamePrefix + "-" + suffix
 }
 
 func ObjectFullName(namespace, name string) string {
