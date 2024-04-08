@@ -37,9 +37,8 @@ const (
 const (
 	VMIPassword = "redhat" // #nosec
 
-	VMUnderTestDefaultContainerDiskImage = "quay.io/kiagnose/kubevirt-realtime-checkup-vm:main"
-	OslatDefaultDuration                 = 5 * time.Minute
-	OslatDefaultLatencyThreshold         = 40 * time.Microsecond
+	OslatDefaultDuration         = 5 * time.Minute
+	OslatDefaultLatencyThreshold = 40 * time.Microsecond
 
 	BootScriptName                          = "realtime-checkup-boot.sh"
 	BootScriptBinDirectory                  = "/usr/bin/"
@@ -48,6 +47,7 @@ const (
 )
 
 var (
+	ErrInvalidVMContainerDiskImage  = errors.New("invalid VM container disk image")
 	ErrInvalidOslatDuration         = errors.New("invalid oslat duration")
 	ErrInvalidOslatLatencyThreshold = errors.New("invalid oslat latency threshold")
 )
@@ -66,13 +66,13 @@ func New(baseConfig kconfig.Config) (Config, error) {
 		PodName:                       baseConfig.PodName,
 		PodUID:                        baseConfig.PodUID,
 		VMUnderTestTargetNodeName:     baseConfig.Params[VMUnderTestTargetNodeNameParamName],
-		VMUnderTestContainerDiskImage: VMUnderTestDefaultContainerDiskImage,
+		VMUnderTestContainerDiskImage: baseConfig.Params[VMUnderTestContainerDiskImageParamName],
 		OslatDuration:                 OslatDefaultDuration,
 		OslatLatencyThreshold:         OslatDefaultLatencyThreshold,
 	}
 
-	if rawVal := baseConfig.Params[VMUnderTestContainerDiskImageParamName]; rawVal != "" {
-		newConfig.VMUnderTestContainerDiskImage = rawVal
+	if newConfig.VMUnderTestContainerDiskImage == "" {
+		return Config{}, ErrInvalidVMContainerDiskImage
 	}
 
 	if rawOslatDuration := baseConfig.Params[OslatDurationParamName]; rawOslatDuration != "" {
