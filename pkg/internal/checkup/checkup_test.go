@@ -42,6 +42,8 @@ import (
 const (
 	testNamespace      = "target-ns"
 	testTargetNodeName = "my-node"
+
+	testVMUnderTestImage = "quay.io/kiagnose/kubevirt-realtime-checkup-vm:main"
 )
 
 func TestCheckupShouldSucceed(t *testing.T) {
@@ -294,10 +296,11 @@ func (es executorStub) Execute(_ context.Context, vmiName string) (status.Result
 
 func newTestConfig() config.Config {
 	return config.Config{
-		PodName:                   "",
-		PodUID:                    "",
-		VMUnderTestTargetNodeName: testTargetNodeName,
-		OslatDuration:             10 * time.Minute,
-		OslatLatencyThreshold:     45 * time.Microsecond,
+		PodName:                       "",
+		PodUID:                        "",
+		VMUnderTestTargetNodeName:     testTargetNodeName,
+		VMUnderTestContainerDiskImage: testVMUnderTestImage,
+		OslatDuration:                 10 * time.Minute,
+		OslatLatencyThreshold:         45 * time.Microsecond,
 	}
 }
