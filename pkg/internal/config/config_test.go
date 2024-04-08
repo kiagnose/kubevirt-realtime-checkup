@@ -43,7 +43,9 @@ func TestNewShouldApplyDefaultsWhenOptionalFieldsAreMissing(t *testing.T) {
 	baseConfig := kconfig.Config{
 		PodName: testPodName,
 		PodUID:  testPodUID,
-		Params:  map[string]string{},
+		Params: map[string]string{
+			config.VMUnderTestContainerDiskImageParamName: testVMContainerDiskImage,
+		},
 	}
 
 	actualConfig, err := config.New(baseConfig)
@@ -53,7 +55,7 @@ func TestNewShouldApplyDefaultsWhenOptionalFieldsAreMissing(t *testing.T) {
 		PodName:                       testPodName,
 		PodUID:                        testPodUID,
 		VMUnderTestTargetNodeName:     "",
-		VMUnderTestContainerDiskImage: config.VMUnderTestDefaultContainerDiskImage,
+		VMUnderTestContainerDiskImage: testVMContainerDiskImage,
 		OslatDuration:                 config.OslatDefaultDuration,
 		OslatLatencyThreshold:         config.OslatDefaultLatencyThreshold,
 	}
@@ -95,20 +97,27 @@ func TestNewShouldFailWhen(t *testing.T) {
 
 	testCases := []failureTestCase{
 		{
+			description:    "VM container disk image is missing",
+			userParameters: map[string]string{},
+			expectedError:  config.ErrInvalidVMContainerDiskImage,
+		},
+		{
 			description: "oslatDuration is invalid",
 			userParameters: map[string]string{
-				config.VMUnderTestTargetNodeNameParamName: testVMUnderTestTargetNodeName,
-				config.OslatDurationParamName:             "wrongValue",
-				config.OslatLatencyThresholdParamName:     testOslatLatencyThresholdMicroSeconds,
+				config.VMUnderTestContainerDiskImageParamName: testVMContainerDiskImage,
+				config.VMUnderTestTargetNodeNameParamName:     testVMUnderTestTargetNodeName,
+				config.OslatDurationParamName:                 "wrongValue",
+				config.OslatLatencyThresholdParamName:         testOslatLatencyThresholdMicroSeconds,
 			},
 			expectedError: config.ErrInvalidOslatDuration,
 		},
 		{
 			description: "oslatLatencyThresholdMicroSeconds is invalid",
 			userParameters: map[string]string{
-				config.VMUnderTestTargetNodeNameParamName: testVMUnderTestTargetNodeName,
-				config.OslatDurationParamName:             testOslatDuration,
-				config.OslatLatencyThresholdParamName:     "wrongValue",
+				config.VMUnderTestContainerDiskImageParamName: testVMContainerDiskImage,
+				config.VMUnderTestTargetNodeNameParamName:     testVMUnderTestTargetNodeName,
+				config.OslatDurationParamName:                 testOslatDuration,
+				config.OslatLatencyThresholdParamName:         "wrongValue",
 			},
 			expectedError: config.ErrInvalidOslatLatencyThreshold,
 		},
