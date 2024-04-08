@@ -65,13 +65,13 @@ roleRef:
 
 ## Configuration
 
-| Key                                          | Description                                                     | Is Mandatory | Remarks                                                          |
-|----------------------------------------------|-----------------------------------------------------------------|--------------|------------------------------------------------------------------|
-| spec.timeout                                 | How much time before the checkup will try to close itself       | True         |                                                                  |
-| spec.param.vmUnderTestContainerDiskImage     | VM under test container disk image                              | False        | Defaults to `quay.io/kiagnose/kubevirt-realtime-checkup-vm:main` |
-| spec.param.vmUnderTestTargetNodeName         | Node Name on which the VM under test will be scheduled to       | False        | Assumed to be configured to nodes that allow realtime traffic    |
-| spec.param.oslatDuration                     | How much time will the oslat program run                        | False        | Defaults to TBD                                                  |
-| spec.param.oslatLatencyThresholdMicroSeconds | A latency higher than this value will cause the checkup to fail | False        | Defaults to TBD                                                  |
+| Key                                          | Description                                                     | Is Mandatory | Remarks                                                       |
+|----------------------------------------------|-----------------------------------------------------------------|--------------|---------------------------------------------------------------|
+| spec.timeout                                 | How much time before the checkup will try to close itself       | True         |                                                               |
+| spec.param.vmUnderTestContainerDiskImage     | VM under test container disk image                              | True         |                                                               |
+| spec.param.vmUnderTestTargetNodeName         | Node Name on which the VM under test will be scheduled to       | False        | Assumed to be configured to nodes that allow realtime traffic |
+| spec.param.oslatDuration                     | How much time will the oslat program run                        | False        | Defaults to TBD                                               |
+| spec.param.oslatLatencyThresholdMicroSeconds | A latency higher than this value will cause the checkup to fail | False        | Defaults to TBD                                               |
 
 ### Example
 
@@ -82,6 +82,7 @@ metadata:
   name: realtime-checkup-config
 data:
   spec.timeout: 10m
+  spec.param.vmUnderTestContainerDiskImage: quay.io/kiagnose/kubevirt-realtime-checkup-vm:main
   spec.param.oslatDuration: 1h
 ```
 
