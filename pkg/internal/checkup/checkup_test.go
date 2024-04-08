@@ -42,7 +42,6 @@ import (
 const (
 	testNamespace      = "target-ns"
 	testTargetNodeName = "my-node"
-	testPVCName        = "my-rt-vm-pvc"
 )
 
 func TestCheckupShouldSucceed(t *testing.T) {
