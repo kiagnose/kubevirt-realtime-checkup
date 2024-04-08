@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.3-1475
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.3-1612
 
 RUN microdnf install -y shadow-utils && \
     adduser --system --no-create-home -u 900 rt-checkup && \
