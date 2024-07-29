@@ -29,7 +29,7 @@ disable_services() {
 
 # Install required packages
 install_packages() {
-  dnf --enablerepo=rt install -y tuned-profiles-realtime
+  dnf --enablerepo=rt install -y kernel-rt tuned-profiles-realtime
   dnf --enablerepo=nfv install -y tuned-profiles-nfv-guest
 }
 
@@ -45,7 +45,12 @@ enable_guest_exec() {
   sed -i '/^BLACKLIST_RPC=/ { s/,\+/,/g; s/^,\|,$//g }' /etc/sysconfig/qemu-ga
 }
 
+disable_bracketed_paste() {
+  echo "set enable-bracketed-paste off" >> /root/.inputrc
+}
+
 disable_services
 install_packages
 disable_swap
 enable_guest_exec
+disable_bracketed_paste
