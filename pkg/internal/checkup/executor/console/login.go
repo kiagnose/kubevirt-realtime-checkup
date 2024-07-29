@@ -106,7 +106,7 @@ func (e Expecter) LoginToCentOSAsRoot(password string) error {
 
 func configureConsole(expecter expect.Expecter) error {
 	batch := []expect.Batcher{
-		&expect.BSnd{S: "stty cols 500 rows 500\n"},
+		&expect.BSnd{S: "stty cols 160 rows 50\n"},
 		&expect.BExp{R: PromptExpression},
 		&expect.BSnd{S: "echo $?\n"},
 		&expect.BExp{R: RetValue("0")},
