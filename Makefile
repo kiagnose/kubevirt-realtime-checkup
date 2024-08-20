@@ -19,7 +19,7 @@ GO_IMAGE_NAME := docker.io/library/golang
 GO_IMAGE_TAG := 1.20.12
 
 LINTER_IMAGE_NAME := docker.io/golangci/golangci-lint
-LINTER_IMAGE_TAG := v1.50.1
+LINTER_IMAGE_TAG := v1.60.1
 KUBECONFIG ?= $(HOME)/.kube/config
 
 PROJECT_WORKING_DIR := /go/src/github.com/kiagnose/kubevirt-realtime-checkup
