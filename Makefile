@@ -16,7 +16,7 @@ VM_CONTAINER_DISK_IMAGE_NAME := kubevirt-realtime-checkup-vm
 VM_CONTAINER_DISK_IMAGE_TAG ?= latest
 
 GO_IMAGE_NAME := docker.io/library/golang
-GO_IMAGE_TAG := 1.20.12
+GO_IMAGE_TAG := 1.22.5
 
 LINTER_IMAGE_NAME := docker.io/golangci/golangci-lint
 LINTER_IMAGE_TAG := v1.60.1
