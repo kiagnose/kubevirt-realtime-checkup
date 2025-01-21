@@ -11,12 +11,15 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+
+	"github.com/kiagnose/kubevirt-realtime-checkup/tests/reporter"
 )
 
 const (
 	namespaceEnvVarName                     = "TEST_NAMESPACE"
 	imageEnvVarName                         = "TEST_CHECKUP_IMAGE"
 	vmUnderTestContainerDiskImageEnvVarName = "VM_UNDER_TEST_CONTAINER_DISK_IMAGE"
+	artifactsEnvVarName                     = "ARTIFACTS_DIR"
 )
 
 const (
@@ -29,6 +32,7 @@ var (
 	testNamespace                 string
 	testImageName                 string
 	vmUnderTestContainerDiskImage string
+	checkupReporter               *reporter.CheckupReporter
 )
 
 func TestTests(t *testing.T) {
@@ -58,4 +62,14 @@ var _ = BeforeSuite(func() {
 	}
 
 	vmUnderTestContainerDiskImage = os.Getenv(vmUnderTestContainerDiskImageEnvVarName)
+
+	artifactsDir := os.Getenv(artifactsEnvVarName)
+
+	checkupReporter = reporter.New(reporter.CheckupReporter{
+		Client:        client,
+		ArtifactsDir:  artifactsDir,
+		Namespace:     testNamespace,
+		JobName:       testCheckupJobName,
+		ConfigMapName: testConfigMapName,
+	})
 })

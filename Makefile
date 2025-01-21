@@ -27,11 +27,13 @@ PROJECT_WORKING_DIR := /go/src/github.com/kiagnose/kubevirt-realtime-checkup
 E2E_TEST_TIMEOUT ?= 1h
 E2E_TEST_ARGS ?= -test.v -test.timeout=$(E2E_TEST_TIMEOUT) -ginkgo.v -ginkgo.timeout=$(E2E_TEST_TIMEOUT) $(E2E_TEST_EXTRA_ARGS)
 
+ARTIFACTS_DIR ?= _output
+
 all: lint unit-test build
 .PHONY: all
 
 build:
-	mkdir -p $(PWD)/_go-cache
+	mkdir -p _go-cache
 
 	$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):$(PROJECT_WORKING_DIR):Z \
@@ -77,6 +79,7 @@ e2e-test:
 		-e TEST_NAMESPACE=$(TEST_NAMESPACE) \
 		-e TEST_CHECKUP_IMAGE=$(TEST_CHECKUP_IMAGE) \
 		-e VM_UNDER_TEST_CONTAINER_DISK_IMAGE=$(VM_UNDER_TEST_CONTAINER_DISK_IMAGE) \
+		-e ARTIFACTS_DIR=$(ARTIFACTS_DIR) \
 		$(GO_IMAGE_NAME):$(GO_IMAGE_TAG) \
 		go test -v ./tests/... $(E2E_TEST_ARGS)
 .PHONY: e2e-test
